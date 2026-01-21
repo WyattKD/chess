@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 
 /**
@@ -75,6 +76,31 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        return switch (pieceType) {
+            case BISHOP -> getBishopMoves(board, myPosition);
+            case KING -> getKingMoves(board, myPosition);
+            case KNIGHT -> getKnightMoves(board, myPosition);
+            case PAWN -> getPawnMoves(board, myPosition);
+            case QUEEN -> getQueenMoves(board, myPosition);
+            case ROOK -> getRookMoves(board, myPosition);
+        };
+    }
+    private HashSet<ChessMove> getBishopMoves(ChessBoard board, ChessPosition myPosition) {
+        throw new RuntimeException("not implemented");
+    }
+    private HashSet<ChessMove> getKingMoves(ChessBoard board, ChessPosition myPosition) {
+        throw new RuntimeException("not implemented");
+    }
+    private HashSet<ChessMove> getKnightMoves(ChessBoard board, ChessPosition myPosition) {
+        throw new RuntimeException("not implemented");
+    }
+    private HashSet<ChessMove> getPawnMoves(ChessBoard board, ChessPosition myPosition) {
+        throw new RuntimeException("not implemented");
+    }
+    private HashSet<ChessMove> getQueenMoves(ChessBoard board, ChessPosition myPosition) {
+        throw new RuntimeException("not implemented");
+    }
+    private HashSet<ChessMove> getRookMoves(ChessBoard board, ChessPosition myPosition) {
+        throw new RuntimeException("not implemented");
     }
 }
