@@ -33,6 +33,14 @@ public class ChessPiece {
         return Objects.hash(teamColor, pieceType);
     }
 
+    @Override
+    public String toString() {
+        return "ChessPiece{" +
+                "teamColor=" + teamColor +
+                ", pieceType=" + pieceType +
+                '}';
+    }
+
     /**
      * The various different chess piece options
      */

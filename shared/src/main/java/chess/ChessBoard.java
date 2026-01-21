@@ -93,4 +93,11 @@ public class ChessBoard {
     public int hashCode() {
         return Arrays.deepHashCode(boardGrid);
     }
+
+    @Override
+    public String toString() {
+        return "ChessBoard{" +
+                "boardGrid=" + Arrays.toString(boardGrid) +
+                '}';
+    }
 }
