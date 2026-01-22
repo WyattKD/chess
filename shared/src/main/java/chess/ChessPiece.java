@@ -15,6 +15,31 @@ public class ChessPiece {
     private ChessGame.TeamColor teamColor;
     private PieceType pieceType;
 
+    // Piece Movement Directions
+    private static final int[][] ROOK_DIRS = {
+            {1, 0}, {-1, 0}, {0, 1}, {0, -1}
+    };
+
+    private static final int[][] BISHOP_DIRS = {
+            {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+    };
+
+    private static final int[][] QUEEN_DIRS = {
+            {1, 0}, {-1, 0}, {0, 1}, {0, -1},
+            {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+    };
+
+    private static final int[][] KNIGHT_DIRS = {
+            {2, 1}, {2, -1}, {-2, 1}, {-2, -1},
+            {1, 2}, {1, -2}, {-1, 2}, {-1, -2}
+    };
+
+    private static final int[][] KING_DIRS = {
+            {1, 0}, {-1, 0}, {0, 1}, {0, -1},
+            {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+    };
+
+
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.teamColor = pieceColor;
         this.pieceType = type;
@@ -76,31 +101,80 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return switch (pieceType) {
-            case BISHOP -> getBishopMoves(board, myPosition);
-            case KING -> getKingMoves(board, myPosition);
-            case KNIGHT -> getKnightMoves(board, myPosition);
-            case PAWN -> getPawnMoves(board, myPosition);
-            case QUEEN -> getQueenMoves(board, myPosition);
-            case ROOK -> getRookMoves(board, myPosition);
-        };
+        if (pieceType != PieceType.PAWN) {
+            return getMoves(board, myPosition);
+        } else {
+            return getPawnMoves(board, myPosition);
+        }
     }
-    private HashSet<ChessMove> getBishopMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("not implemented");
+
+    private boolean isOnBoard(int row, int col) {
+        return row >= 1 && row <= 8 && col >= 1 && col <= 8;
     }
-    private HashSet<ChessMove> getKingMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("not implemented");
+
+    private boolean isOnBoard(ChessPosition pos) {
+        return isOnBoard(pos.getRow(), pos.getColumn());
     }
-    private HashSet<ChessMove> getKnightMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("not implemented");
+
+    private HashSet<ChessMove> getMoves(ChessBoard board, ChessPosition myPosition) {
+        HashSet<ChessMove> moves = new HashSet<>();
+
+        int[][] directions;
+        boolean sliding;
+
+        switch (pieceType) {
+            case ROOK -> {
+                directions = ROOK_DIRS;
+                sliding = true;
+            }
+            case BISHOP -> {
+                directions = BISHOP_DIRS;
+                sliding = true;
+            }
+            case QUEEN -> {
+                directions = QUEEN_DIRS;
+                sliding = true;
+            }
+            case KNIGHT -> {
+                directions = KNIGHT_DIRS;
+                sliding = false;
+            }
+            case KING -> {
+                directions = KING_DIRS;
+                sliding = false;
+            }
+            default -> throw new IllegalStateException();
+        }
+
+        for (int[] dir : directions) {
+            int row = myPosition.getRow() + dir[0];
+            int col = myPosition.getColumn() + dir[1];
+
+            while (isOnBoard(row, col)) {
+                ChessPosition targetPos = new ChessPosition(row, col);
+                ChessPiece targetPiece = board.getPiece(targetPos);
+
+                if (targetPiece == null) {
+                    moves.add(new ChessMove(myPosition, targetPos, null)); // blank space move
+                } else {
+                    if (targetPiece.teamColor != this.teamColor) {
+                        moves.add(new ChessMove(myPosition, targetPos, null)); // capture move
+                    }
+                    break; // blocked
+                }
+
+                if (!sliding) break;
+
+                row += dir[0];
+                col += dir[1];
+            }
+        }
+
+        return moves;
     }
+
     private HashSet<ChessMove> getPawnMoves(ChessBoard board, ChessPosition myPosition) {
         throw new RuntimeException("not implemented");
     }
-    private HashSet<ChessMove> getQueenMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("not implemented");
-    }
-    private HashSet<ChessMove> getRookMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("not implemented");
-    }
+
 }
