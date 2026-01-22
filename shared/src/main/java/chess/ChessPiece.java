@@ -116,6 +116,7 @@ public class ChessPiece {
         return isOnBoard(pos.getRow(), pos.getColumn());
     }
 
+    // Uses piece vectors to calculate possible moves
     private HashSet<ChessMove> getMoves(ChessBoard board, ChessPosition myPosition) {
         HashSet<ChessMove> moves = new HashSet<>();
 
