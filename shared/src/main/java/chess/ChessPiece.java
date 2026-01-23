@@ -121,20 +121,17 @@ public class ChessPiece {
         HashSet<ChessMove> moves = new HashSet<>();
 
         int[][] directions;
-        boolean sliding;
+        boolean sliding = true;
 
         switch (pieceType) {
             case ROOK -> {
                 directions = ROOK_DIRS;
-                sliding = true;
             }
             case BISHOP -> {
                 directions = BISHOP_DIRS;
-                sliding = true;
             }
             case QUEEN -> {
                 directions = QUEEN_DIRS;
-                sliding = true;
             }
             case KNIGHT -> {
                 directions = KNIGHT_DIRS;
@@ -173,9 +170,57 @@ public class ChessPiece {
 
         return moves;
     }
-
+    // Calculates possible pawn moves
     private HashSet<ChessMove> getPawnMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("not implemented");
+        HashSet<ChessMove> moves = new HashSet<>();
+
+        int direction = (teamColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
+        int startRow = (teamColor == ChessGame.TeamColor.WHITE) ? 2 : 7;
+        int promotionRow = (teamColor == ChessGame.TeamColor.WHITE) ? 8 : 1;
+
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+
+        // forward one
+        ChessPosition oneForward = new ChessPosition(row + direction, col);
+        if (isOnBoard(oneForward) && board.getPiece(oneForward) == null) {
+            addPawnMove(moves, myPosition, oneForward, promotionRow);
+
+            // forward two
+            ChessPosition twoForward = new ChessPosition(row + 2 * direction, col);
+            if (row == startRow && board.getPiece(twoForward) == null) {
+                moves.add(new ChessMove(myPosition, twoForward, null));
+            }
+        }
+
+        // captures
+        for (int dc : new int[]{-1, 1}) {
+            ChessPosition diag = new ChessPosition(row + direction, col + dc);
+            if (isOnBoard(diag)) {
+                ChessPiece target = board.getPiece(diag);
+                if (target != null && target.teamColor != this.teamColor) {
+                    addPawnMove(moves, myPosition, diag, promotionRow);
+                }
+            }
+        }
+
+        return moves;
     }
+    // Handles possible promotion
+    private void addPawnMove(HashSet<ChessMove> moves,
+                             ChessPosition from,
+                             ChessPosition to,
+                             int promotionRow) {
+
+        if (to.getRow() == promotionRow) {
+            moves.add(new ChessMove(from, to, PieceType.QUEEN));
+            moves.add(new ChessMove(from, to, PieceType.ROOK));
+            moves.add(new ChessMove(from, to, PieceType.BISHOP));
+            moves.add(new ChessMove(from, to, PieceType.KNIGHT));
+        } else {
+            moves.add(new ChessMove(from, to, null));
+        }
+    }
+
 
 }
