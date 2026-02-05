@@ -161,7 +161,9 @@ public class ChessPiece {
                     break; // blocked
                 }
 
-                if (!sliding) break;
+                if (!sliding) {
+                    break;
+                }
 
                 row += dir[0];
                 col += dir[1];
