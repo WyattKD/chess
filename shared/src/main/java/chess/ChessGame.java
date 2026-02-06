@@ -71,12 +71,12 @@ public class ChessGame {
             return null;
         }
 
-        Collection<ChessMove> pseudoMoves =
+        Collection<ChessMove> allMoves =
                 piece.pieceMoves(board, startPosition);
 
         Collection<ChessMove> legalMoves = new HashSet<>();
 
-        for (ChessMove move : pseudoMoves) {
+        for (ChessMove move : allMoves) {
             if (!leavesKingInCheck(move, piece.getTeamColor())) {
                 legalMoves.add(move);
             }
@@ -266,8 +266,8 @@ public class ChessGame {
     }
 
     private boolean leavesKingInCheck(ChessMove move, TeamColor team) {
-        ChessBoard potentialBoard = new ChessBoard();
         ChessPiece piece = board.getPiece(move.getStartPosition());
+        ChessPiece capturedPiece = board.getPiece(move.getEndPosition());
 
         board.removePiece(move.getStartPosition());
         board.addPiece(move.getEndPosition(), piece);
@@ -277,10 +277,16 @@ public class ChessGame {
         if (isSquareAttacked(kingPos, team == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE)) {
             board.removePiece(move.getEndPosition());
             board.addPiece(move.getStartPosition(), piece);
+            if (capturedPiece != null) {
+                board.addPiece(move.getEndPosition(), capturedPiece);
+            }
             return true;
         } else {
             board.removePiece(move.getEndPosition());
             board.addPiece(move.getStartPosition(), piece);
+            if (capturedPiece != null) {
+                board.addPiece(move.getEndPosition(), capturedPiece);
+            }
             return false;
         }
     }
