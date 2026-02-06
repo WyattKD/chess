@@ -156,10 +156,10 @@ public class ChessGame {
     /**
      * Sets this game's chessboard with a given board
      *
-     * @param new_board the new board to use
+     * @param newBoard the new board to use
      */
-    public void setBoard(ChessBoard new_board) {
-        board = new_board;
+    public void setBoard(ChessBoard newBoard) {
+        board = newBoard;
     }
 
     /**
