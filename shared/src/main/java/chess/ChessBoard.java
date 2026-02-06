@@ -17,6 +17,7 @@ public class ChessBoard {
         boardGrid = new ChessPiece[8][8];
     }
 
+
     /**
      * Adds a chess piece to the chessboard
      *

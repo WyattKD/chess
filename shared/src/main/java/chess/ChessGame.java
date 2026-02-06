@@ -266,14 +266,23 @@ public class ChessGame {
     }
 
     private boolean leavesKingInCheck(ChessMove move, TeamColor team) {
-        ChessBoard potentialBoard = new ChessBoard(); // copy constructor assumed
-        ChessPiece piece = potentialBoard.getPiece(move.getStartPosition());
+        ChessBoard potentialBoard = new ChessBoard();
+        ChessPiece piece = board.getPiece(move.getStartPosition());
 
-        potentialBoard.removePiece(move.getStartPosition());
-        potentialBoard.addPiece(move.getEndPosition(), piece);
+        board.removePiece(move.getStartPosition());
+        board.addPiece(move.getEndPosition(), piece);
 
         ChessPosition kingPos = findKing(team);
-        return isSquareAttacked(kingPos, team == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
+
+        if (isSquareAttacked(kingPos, team == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE)) {
+            board.removePiece(move.getEndPosition());
+            board.addPiece(move.getStartPosition(), piece);
+            return true;
+        } else {
+            board.removePiece(move.getEndPosition());
+            board.addPiece(move.getStartPosition(), piece);
+            return false;
+        }
     }
 
     private boolean hasAnyAvailableMoves(TeamColor team) {
