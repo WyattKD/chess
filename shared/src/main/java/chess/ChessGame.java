@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -49,10 +50,26 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        ChessPiece currentPiece = board.getPiece(startPosition);
-        Collection<ChessMove> moves = currentPiece.pieceMoves(board, startPosition);
-        return moves;
+        ChessPiece piece = board.getPiece(startPosition);
+
+        if (piece == null) {
+            return null;
+        }
+
+        Collection<ChessMove> pseudoMoves =
+                piece.pieceMoves(board, startPosition);
+
+        Collection<ChessMove> legalMoves = new HashSet<>();
+
+        for (ChessMove move : pseudoMoves) {
+            if (!leavesKingInCheck(move, piece.getTeamColor())) {
+                legalMoves.add(move);
+            }
+        }
+
+        return legalMoves;
     }
+
 
     /**
      * Makes a move in a chess game
@@ -62,8 +79,30 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPiece piece = board.getPiece(move.getStartPosition());
+
+        if (piece == null) {
+            throw new InvalidMoveException("Can't move empty space");
+        }
+
+        if (piece.getTeamColor() != currentTurn) {
+            throw new InvalidMoveException("Can't move enemy piece");
+        }
+
+        Collection<ChessMove> legalMoves = validMoves(move.getStartPosition());
+        if (!legalMoves.contains(move)) {
+            throw new InvalidMoveException("Not a valid move");
+        }
+
         board.removePiece(move.getStartPosition());
-        board.addPiece(move.getEndPosition(), piece);
+
+        if (move.getPromotionPiece() != null) {
+            board.addPiece(move.getEndPosition(),
+                    new ChessPiece(currentTurn, move.getPromotionPiece()));
+        } else {
+            board.addPiece(move.getEndPosition(), piece);
+        }
+
+        currentTurn = currentTurn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
     }
 
     /**
@@ -208,6 +247,17 @@ public class ChessGame {
             col += dc;
         }
         return false;
+    }
+
+    private boolean leavesKingInCheck(ChessMove move, TeamColor team) {
+        ChessBoard potentialBoard = new ChessBoard(); // copy constructor assumed
+        ChessPiece piece = potentialBoard.getPiece(move.getStartPosition());
+
+        potentialBoard.removePiece(move.getStartPosition());
+        potentialBoard.addPiece(move.getEndPosition(), piece);
+
+        ChessPosition kingPos = findKing(team);
+        return isSquareAttacked(kingPos, team == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
     }
 
 }
