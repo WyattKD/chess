@@ -61,7 +61,9 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPiece piece = board.getPiece(move.getStartPosition());
+        board.removePiece(move.getStartPosition());
+        board.addPiece(move.getEndPosition(), piece);
     }
 
     /**
@@ -112,4 +114,43 @@ public class ChessGame {
     public ChessBoard getBoard() {
         throw new RuntimeException("Not implemented");
     }
+
+    private ChessPosition findKing(TeamColor team) {
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition pos = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(pos);
+
+                if (piece != null &&
+                        piece.getTeamColor() == team &&
+                        piece.getPieceType() == ChessPiece.PieceType.KING) {
+                    return pos;
+                }
+            }
+        }
+        throw new IllegalStateException("Somehow there is not a king on the board");
+    }
+
+    private boolean isSquareAttacked(ChessPosition square, TeamColor byTeam) {
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition from = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(from);
+
+                if (piece == null || piece.getTeamColor() != byTeam) {
+                    continue;
+                }
+
+                if (pieceAttacksSquare(piece, from, square)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean pieceAttacksSquare(ChessPiece piece, ChessPosition from, ChessPosition to) {
+        return true;
+    }
+
 }
