@@ -73,7 +73,8 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition kingPos = findKing(teamColor);
+        return isSquareAttacked(kingPos, teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
     }
 
     /**
@@ -150,7 +151,63 @@ public class ChessGame {
     }
 
     private boolean pieceAttacksSquare(ChessPiece piece, ChessPosition from, ChessPosition to) {
-        return true;
+        int dr = Integer.compare(to.getRow(), from.getRow());
+        int dc = Integer.compare(to.getColumn(), from.getColumn());
+
+        return switch (piece.getPieceType()) {
+            case PAWN -> pawnAttacks(from, to, piece.getTeamColor());
+            case KNIGHT -> knightAttacks(from, to);
+            case BISHOP -> Math.abs(from.getRow() - to.getRow()) ==
+                    Math.abs(from.getColumn() - to.getColumn()) &&
+                    slidingAttacks(from, to, dr, dc);
+            case ROOK -> (from.getRow() == to.getRow() ||
+                    from.getColumn() == to.getColumn()) &&
+                    slidingAttacks(from, to, dr, dc);
+            case QUEEN -> ((from.getRow() == to.getRow() ||
+                    from.getColumn() == to.getColumn()) ||
+                    Math.abs(from.getRow() - to.getRow()) ==
+                            Math.abs(from.getColumn() - to.getColumn())) &&
+                    slidingAttacks(from, to, dr, dc);
+            case KING -> Math.max(
+                    Math.abs(from.getRow() - to.getRow()),
+                    Math.abs(from.getColumn() - to.getColumn())
+            ) == 1;
+            default -> false;
+        };
+    }
+
+    private boolean pawnAttacks(ChessPosition from, ChessPosition to, TeamColor color) {
+        int dir = (color == TeamColor.WHITE) ? 1 : -1;
+
+        return to.getRow() == from.getRow() + dir &&
+                Math.abs(to.getColumn() - from.getColumn()) == 1;
+    }
+
+    private boolean knightAttacks(ChessPosition from, ChessPosition to) {
+        int dr = Math.abs(from.getRow() - to.getRow());
+        int dc = Math.abs(from.getColumn() - to.getColumn());
+        return (dr == 2 && dc == 1) || (dr == 1 && dc == 2);
+    }
+
+    private boolean slidingAttacks(ChessPosition from, ChessPosition to, int dr, int dc) {
+        int row = from.getRow() + dr;
+        int col = from.getColumn() + dc;
+
+        while (row >= 1 && row <= 8 && col >= 1 && col <= 8) {
+            ChessPosition cur = new ChessPosition(row, col);
+
+            if (cur.equals(to)) {
+                return true;
+            }
+
+            if (board.getPiece(cur) != null) {
+                return false;
+            }
+
+            row += dr;
+            col += dc;
+        }
+        return false;
     }
 
 }
