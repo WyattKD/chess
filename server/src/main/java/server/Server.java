@@ -1,6 +1,7 @@
 package server;
 
 import io.javalin.Javalin;
+import model.UserData;
 
 public class Server {
 
@@ -10,7 +11,6 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.
-
     }
 
     public int run(int desiredPort) {
