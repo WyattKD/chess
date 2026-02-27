@@ -10,7 +10,7 @@ import service.GameService;
 import service.UserService;
 import model.requests.*;
 import model.results.*;
-import javax.xml.crypto.Data;
+
 
 public class Server {
 
@@ -37,18 +37,21 @@ public class Server {
 
             clearService = new ClearService(authDAO, gameDAO, userDAO);
             //gameService = new GameService();
-            //userService = new UserService();
+            userService = new UserService(authDAO, userDAO);
         } catch (Exception exception) {
             System.out.println(exception);
         }
         
         javalin.delete("/db", this::clearHandler);
+        javalin.post("/user", this::registerHandler);
+        javalin.post("/session", this::loginHandler);
+        javalin.delete("/session", this::logoutHandler);
 
     }
 
     private void failureHandler(String failure_msg, Context context) {
         if (failure_msg == null) {
-            return;
+            context.status(200);
         } else if (failure_msg.equals("Error: bad request")) {
             context.status(400);
         } else if (failure_msg.equals("Error: unauthorized")) {
@@ -66,10 +69,27 @@ public class Server {
         return "{}";
     }
 
-    private Object registerHandler(@NotNull Context context) throws DataAccessException {
+    private Object registerHandler(@NotNull Context context) {
         RegisterRequest request = new Gson().fromJson(context.body(), RegisterRequest.class);
         RegisterResult result = userService.register(request);
         failureHandler(result.message(), context);
+        context.result(new Gson().toJson(result));
+        return new Gson().toJson(result);
+    }
+
+    private Object loginHandler(@NotNull Context context) {
+        LoginRequest request = new Gson().fromJson(context.body(), LoginRequest.class);
+        LoginResult result = userService.login(request);
+        failureHandler(result.message(), context);
+        context.result(new Gson().toJson(result));
+        return new Gson().toJson(result);
+    }
+
+    private Object logoutHandler(@NotNull Context context) {
+        LogoutRequest request = new LogoutRequest(context.header("authorization"));
+        LogoutResult result = userService.logout(request);
+        failureHandler(result.message(), context);
+        context.result(new Gson().toJson(result));
         return new Gson().toJson(result);
     }
 

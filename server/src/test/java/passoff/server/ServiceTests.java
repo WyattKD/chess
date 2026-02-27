@@ -83,4 +83,39 @@ public class ServiceTests {
         Assertions.assertEquals(new RegisterResult(null, null, "Error: already taken"), result);
 
     }
+    @Test
+    @DisplayName("Positive Login")
+    void testLoginPositive() throws DataAccessException {
+        userDAO.createUser(testUserData);
+        LoginResult result = userService.login(new LoginRequest("test", "test"));
+        Assertions.assertNotNull(result.username());
+        Assertions.assertNotNull(result.authToken());
+        Assertions.assertNull(result.message());
+    }
+
+    @Test
+    @DisplayName("Negative Login")
+    void testLoginNegative() throws DataAccessException {
+        userDAO.createUser(testUserData);
+        LoginResult result = userService.login(new LoginRequest("test", "i_forgot"));
+        Assertions.assertEquals(new LoginResult(null, null, "Error: unauthorized"), result);
+    }
+
+    @Test
+    @DisplayName("Positive Logout")
+    void testLogoutPositive() throws DataAccessException {
+        final String[] authToken = new String[1];
+        authToken[0] = authDAO.createAuth(testUserData).authToken();
+        LogoutResult result = userService.logout(new LogoutRequest(authToken[0]));
+        Assertions.assertEquals(new LogoutResult(null), result);
+    }
+
+    @Test
+    @DisplayName("Negative Logout")
+    void testLogoutNegative() throws DataAccessException {
+        String authToken = "fake";
+        LogoutResult result = userService.logout(new LogoutRequest(authToken));
+        Assertions.assertEquals(new LogoutResult("Error: unauthorized"), result);
+    }
+
 }

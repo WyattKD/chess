@@ -23,7 +23,7 @@ public class MemoryUserDAO implements dataaccess.UserDAO {
         if (userDataMap.containsKey(username)) {
             return userDataMap.get(username);
         } else {
-            throw new DataAccessException("User does not exist");
+            throw new DataAccessException("unauthorized");
         }
 
     }
