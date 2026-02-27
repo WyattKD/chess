@@ -5,10 +5,13 @@ import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import model.requests.*;
+import model.results.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.*;
 import service.ClearService;
 import service.GameService;
+import service.UserService;
 
 import java.util.HashSet;
 
@@ -23,6 +26,7 @@ public class ServiceTests {
     static UserData testUserData;
     static GameData testGameData;
     static GameService gameService;
+    static UserService userService;
     static ChessGame testGame;
 
     @BeforeAll
@@ -31,6 +35,7 @@ public class ServiceTests {
         authDAO = new MemoryAuthDAO();
         userDAO = new MemoryUserDAO();
         //gameService = new GameService(gameDAO, authDAO);
+        userService = new UserService(authDAO, userDAO);
         testAuthData = new AuthData("Username", "authToken");
         testGameData = new GameData(1, "w", "b", "game", testGame);
         testUserData = new UserData("test", "test", "test");
@@ -39,6 +44,8 @@ public class ServiceTests {
     @BeforeEach
     void setup() throws DataAccessException {
         gameDAO.clear();
+        userDAO.clear();
+        authDAO.clear();
     }
 
     @Test
@@ -57,4 +64,23 @@ public class ServiceTests {
         Assertions.assertThrows(DataAccessException.class, () -> gameDAO.getGame(1));
     }
 
+    @Test
+    @DisplayName("Positive Register")
+    void testRegisterPositive() {
+        RegisterResult result = userService.register(new RegisterRequest("test", "test", "test"));
+        Assertions.assertNotNull(result.authToken());
+        Assertions.assertNotNull(result.username());
+        Assertions.assertNull(result.message());
+    }
+
+    @Test
+    @DisplayName("Negative Register")
+    void testRegisterNegative() throws DataAccessException {
+        RegisterResult result = userService.register(new RegisterRequest("test", null, null));
+        Assertions.assertEquals(new RegisterResult(null, null, "Error: bad request"), result);
+        userDAO.createUser(testUserData);
+        result = userService.register(new RegisterRequest("test", "test", "test"));
+        Assertions.assertEquals(new RegisterResult(null, null, "Error: already taken"), result);
+
+    }
 }

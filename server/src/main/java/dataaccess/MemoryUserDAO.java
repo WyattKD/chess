@@ -13,7 +13,7 @@ public class MemoryUserDAO implements dataaccess.UserDAO {
     @Override
     public void createUser(UserData userData) throws DataAccessException {
         if (userDataMap.containsKey(userData.username())) {
-            throw new DataAccessException("User already exists");
+            throw new DataAccessException("already taken");
         }
         userDataMap.put(userData.username(), new UserData(userData.username(), userData.password(), userData.email()));
     }
