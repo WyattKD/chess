@@ -40,7 +40,7 @@ public class MemoryGameDAO implements dataaccess.GameDAO {
     }
 
     @Override
-    public GameData getGame(int gameID) throws DataAccessException {
+    public GameData getGame(int gameID) {
         return db.get(gameID);
     }
 

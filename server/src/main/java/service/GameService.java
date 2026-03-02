@@ -54,4 +54,52 @@ public class GameService {
         }
     }
 
+    public JoinGameResult joinGame(JoinGameRequest joinGameRequest) {
+        try {
+            GameData gameData = gameDAO.getGame(joinGameRequest.gameID());
+
+            if (gameData == null || joinGameRequest.playerColor() == null) {
+                return new JoinGameResult("Error: bad request");
+            }
+
+            AuthData authData = authDAO.getAuth(joinGameRequest.authToken());
+
+            if (authData == null) {
+                return new JoinGameResult("Error: unauthorized");
+            }
+            switch (joinGameRequest.playerColor()) {
+                case "WHITE" -> {
+                    if (gameData.whiteUsername() == null) {
+                        gameData = new GameData(gameData.gameID(), authData.username(), gameData.blackUsername(), gameData.gameName(), gameData.game());
+                    } else {
+                        throw new DataAccessException("already taken");
+                    }
+                }
+                case "BLACK" -> {
+                    if (gameData.blackUsername() == null) {
+                        gameData = new GameData(gameData.gameID(), gameData.whiteUsername(), authData.username(), gameData.gameName(), gameData.game());
+                    } else {
+                        throw new DataAccessException("already taken");
+                    }
+                }
+                case "WHITE/BLACK" -> {
+                    if (gameData.whiteUsername() == null) {
+                        gameData = new GameData(gameData.gameID(), authData.username(), gameData.blackUsername(), gameData.gameName(), gameData.game());
+                    } else if (gameData.blackUsername() == null) {
+                        gameData = new GameData(gameData.gameID(), gameData.whiteUsername(), authData.username(), gameData.gameName(), gameData.game());
+                    } else {
+                        throw new DataAccessException("already taken");
+                    }
+                }
+                default -> {
+                    throw new DataAccessException("bad request");
+                }
+            }
+
+            gameDAO.updateGame(gameData);
+        } catch (DataAccessException exception) {
+            return new JoinGameResult("Error: " + exception.getMessage());
+        }
+        return new JoinGameResult(null);
+    }
 }

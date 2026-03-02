@@ -14,8 +14,6 @@ import service.GameService;
 import service.UserService;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 
 
 public class ServiceTests {
@@ -65,7 +63,6 @@ public class ServiceTests {
         clearService.clearDatabase();
         Assertions.assertThrows(DataAccessException.class, () -> userDAO.getUser("Test"));
         Assertions.assertThrows(DataAccessException.class, () -> authDAO.getAuth(authToken[0]));
-        Assertions.assertThrows(DataAccessException.class, () -> gameDAO.getGame(1));
     }
 
     @Test
@@ -150,7 +147,7 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Positive List Games")
-    void testListGamesGood() throws DataAccessException {
+    void testListGamesPositive() throws DataAccessException {
         gameDAO.createGame("game1");
         gameDAO.createGame("game2");
         String authToken = authDAO.createAuth(testUserData).authToken();
@@ -162,11 +159,45 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Negative List Games")
-    void testListGamesBad() throws DataAccessException {
+    void testListGamesNegative() throws DataAccessException {
         String authToken = authDAO.createAuth(testUserData).authToken();
         authDAO.deleteAuth(authToken);
         ListGamesResult result = gameService.listGames(new ListGamesRequest(authToken));
         Assertions.assertEquals(new ListGamesResult(null, "Error: unauthorized"), result);
+    }
+
+    @Test
+    @DisplayName("Positive Join Game")
+    void testJoinGamePositive() throws DataAccessException {
+        int gameID = gameDAO.createGame("game1");
+        String authToken = authDAO.createAuth(testUserData).authToken();
+        JoinGameResult result = gameService.joinGame(new JoinGameRequest(authToken, "WHITE", gameID));
+        Assertions.assertEquals(new JoinGameResult(null), result);
+        result = gameService.joinGame(new JoinGameRequest(authToken, "WHITE/BLACK", gameID));
+        Assertions.assertEquals(new JoinGameResult(null), result);
+    }
+
+    @Test
+    @DisplayName("Negative Join Game")
+    void testJoinGameNegative() throws DataAccessException {
+        int gameID = gameDAO.createGame("game1");
+        String authToken = authDAO.createAuth(testUserData).authToken();
+        GameData gameData = gameDAO.getGame(gameID);
+        gameData = new GameData(gameID, "TakenWhite", "TakenBlack", gameData.gameName(), gameData.game());
+        gameDAO.updateGame(gameData);
+
+        JoinGameResult result = gameService.joinGame(new JoinGameRequest(authToken, "WHITE", gameID));
+        Assertions.assertEquals(new JoinGameResult("Error: already taken"), result);
+
+        result = gameService.joinGame(new JoinGameRequest(authToken, "BLACK", gameID));
+        Assertions.assertEquals(new JoinGameResult("Error: already taken"), result);
+
+        result = gameService.joinGame(new JoinGameRequest(authToken, "", gameID));
+        Assertions.assertEquals(new JoinGameResult("Error: bad request"), result);
+
+        authDAO.deleteAuth(authToken);
+        result = gameService.joinGame(new JoinGameRequest(authToken, "BLACK", gameID));
+        Assertions.assertEquals(new JoinGameResult("Error: unauthorized"), result);
     }
 
 }
