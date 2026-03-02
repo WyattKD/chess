@@ -70,23 +70,27 @@ public class GameService {
             switch (joinGameRequest.playerColor()) {
                 case "WHITE" -> {
                     if (gameData.whiteUsername() == null) {
-                        gameData = new GameData(gameData.gameID(), authData.username(), gameData.blackUsername(), gameData.gameName(), gameData.game());
+                        gameData = new GameData(gameData.gameID(), authData.username(), gameData.blackUsername(),
+                                gameData.gameName(), gameData.game());
                     } else {
                         throw new DataAccessException("already taken");
                     }
                 }
                 case "BLACK" -> {
                     if (gameData.blackUsername() == null) {
-                        gameData = new GameData(gameData.gameID(), gameData.whiteUsername(), authData.username(), gameData.gameName(), gameData.game());
+                        gameData = new GameData(gameData.gameID(), gameData.whiteUsername(), authData.username(),
+                                gameData.gameName(), gameData.game());
                     } else {
                         throw new DataAccessException("already taken");
                     }
                 }
                 case "WHITE/BLACK" -> {
                     if (gameData.whiteUsername() == null) {
-                        gameData = new GameData(gameData.gameID(), authData.username(), gameData.blackUsername(), gameData.gameName(), gameData.game());
+                        gameData = new GameData(gameData.gameID(), authData.username(), gameData.blackUsername(),
+                                gameData.gameName(), gameData.game());
                     } else if (gameData.blackUsername() == null) {
-                        gameData = new GameData(gameData.gameID(), gameData.whiteUsername(), authData.username(), gameData.gameName(), gameData.game());
+                        gameData = new GameData(gameData.gameID(), gameData.whiteUsername(), authData.username(),
+                                gameData.gameName(), gameData.game());
                     } else {
                         throw new DataAccessException("already taken");
                     }
