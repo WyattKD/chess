@@ -13,6 +13,8 @@ import service.ClearService;
 import service.GameService;
 import service.UserService;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 
 
@@ -144,6 +146,27 @@ public class ServiceTests {
         result = gameService.createGame(new CreateGameRequest(authToken, testGameData.gameName()));
         expectedResult = new CreateGameResult(null, "Error: unauthorized");
         Assertions.assertEquals(expectedResult, result);
+    }
+
+    @Test
+    @DisplayName("Positive List Games")
+    void testListGamesGood() throws DataAccessException {
+        gameDAO.createGame("game1");
+        gameDAO.createGame("game2");
+        String authToken = authDAO.createAuth(testUserData).authToken();
+        ListGamesResult result = gameService.listGames(new ListGamesRequest(authToken));
+
+        Collection<GameData> gamesList = gameDAO.listGames();
+        Assertions.assertEquals(new ListGamesResult(gamesList, null), result);
+    }
+
+    @Test
+    @DisplayName("Negative List Games")
+    void testListGamesBad() throws DataAccessException {
+        String authToken = authDAO.createAuth(testUserData).authToken();
+        authDAO.deleteAuth(authToken);
+        ListGamesResult result = gameService.listGames(new ListGamesRequest(authToken));
+        Assertions.assertEquals(new ListGamesResult(null, "Error: unauthorized"), result);
     }
 
 }

@@ -4,6 +4,7 @@ import chess.ChessGame;
 import model.GameData;
 
 import java.util.HashMap;
+import java.util.Collection;
 import java.util.Random;
 
 public class MemoryGameDAO implements dataaccess.GameDAO {
@@ -44,8 +45,8 @@ public class MemoryGameDAO implements dataaccess.GameDAO {
     }
 
     @Override
-    public HashMap<Integer, GameData> listGames() {
-        return db;
+    public Collection<GameData> listGames() {
+        return db.values();
     }
 
     @Override

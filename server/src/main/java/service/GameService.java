@@ -4,8 +4,10 @@ import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import model.AuthData;
+import model.GameData;
 import model.results.*;
 import model.requests.*;
+import java.util.Collection;
 
 public class GameService {
     private final AuthDAO authDAO;
@@ -31,6 +33,24 @@ public class GameService {
             return new CreateGameResult(gameID, null);
         } catch (DataAccessException exception) {
             return new CreateGameResult(null, "Error: " + exception.getMessage());
+        }
+    }
+
+    public ListGamesResult listGames(ListGamesRequest listGamesRequest) {
+        try {
+            AuthData authData = authDAO.getAuth(listGamesRequest.authToken());
+            if (authData == null) {
+                throw new DataAccessException(null);
+            }
+        } catch (DataAccessException e) {
+            return new ListGamesResult(null, "Error: unauthorized");
+        }
+
+        try {
+            Collection<GameData> gamesList = gameDAO.listGames();
+            return new ListGamesResult(gamesList, null);
+        } catch (DataAccessException exception) {
+            return new ListGamesResult(null, "Error: " + exception.getMessage());
         }
     }
 

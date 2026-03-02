@@ -47,6 +47,7 @@ public class Server {
         javalin.post("/session", this::loginHandler);
         javalin.delete("/session", this::logoutHandler);
         javalin.post("/game", this::createGameHandler);
+        javalin.get("/game", this::listGameHandler);
     }
 
     private void failureHandler(String failureMsg, Context context) {
@@ -93,6 +94,13 @@ public class Server {
         String gameName = new Gson().fromJson(context.body(), CreateGameRequest.class).gameName();
         CreateGameRequest request = new CreateGameRequest(context.header("Authorization"), gameName);
         CreateGameResult result = gameService.createGame(request);
+        failureHandler(result.message(), context);
+        context.result(new Gson().toJson(result));
+    }
+
+    private void listGameHandler(@NotNull Context context) {
+        ListGamesRequest request = new ListGamesRequest(context.header("Authorization"));
+        ListGamesResult result = gameService.listGames(request);
         failureHandler(result.message(), context);
         context.result(new Gson().toJson(result));
     }
