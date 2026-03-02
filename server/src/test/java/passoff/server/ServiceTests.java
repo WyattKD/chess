@@ -34,8 +34,10 @@ public class ServiceTests {
         gameDAO = new MemoryGameDAO();
         authDAO = new MemoryAuthDAO();
         userDAO = new MemoryUserDAO();
-        //gameService = new GameService(gameDAO, authDAO);
+        gameService = new GameService(authDAO, gameDAO);
         userService = new UserService(authDAO, userDAO);
+
+        testGame = new ChessGame();
         testAuthData = new AuthData("Username", "authToken");
         testGameData = new GameData(1, "w", "b", "game", testGame);
         testUserData = new UserData("test", "test", "test");
@@ -54,7 +56,7 @@ public class ServiceTests {
         userDAO.createUser(testUserData);
         final String[] authToken = new String[1];
         authToken[0] = authDAO.createAuth(testUserData).authToken();
-        gameDAO.createGame(testGameData);
+        gameDAO.createGame(testGameData.gameName());
         GameData gameID = gameDAO.getGame(1);
         ClearService clearService = new ClearService(authDAO, gameDAO, userDAO);
         Assertions.assertDoesNotThrow(clearService::clearDatabase);
@@ -116,6 +118,32 @@ public class ServiceTests {
         String authToken = "fake";
         LogoutResult result = userService.logout(new LogoutRequest(authToken));
         Assertions.assertEquals(new LogoutResult("Error: unauthorized"), result);
+    }
+
+    @Test
+    @DisplayName("Positive Create Game")
+    void testCreateGamePositive() throws DataAccessException {
+        String authToken = authDAO.createAuth(testUserData).authToken();
+        int gameID = gameService.createGame(new CreateGameRequest(authToken, testGameData.gameName())).gameID();
+
+        GameData expectedGameData = new GameData(gameID, null, null, "game", new ChessGame());
+        Assertions.assertDoesNotThrow(() -> {
+            Assertions.assertEquals(expectedGameData, gameDAO.getGame(gameID));
+        });
+    }
+
+    @Test
+    @DisplayName("Negative Create Game")
+    void testCreateGameNegative() throws DataAccessException {
+        String authToken = authDAO.createAuth(testUserData).authToken();
+        CreateGameResult result = gameService.createGame(new CreateGameRequest(authToken, null));
+        CreateGameResult expectedResult = new CreateGameResult(null, "Error: bad request");
+        Assertions.assertEquals(expectedResult, result);
+
+        authDAO.deleteAuth(authToken);
+        result = gameService.createGame(new CreateGameRequest(authToken, testGameData.gameName()));
+        expectedResult = new CreateGameResult(null, "Error: unauthorized");
+        Assertions.assertEquals(expectedResult, result);
     }
 
 }

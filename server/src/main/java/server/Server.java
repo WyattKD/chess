@@ -36,7 +36,7 @@ public class Server {
             userDAO = new MemoryUserDAO();
 
             clearService = new ClearService(authDAO, gameDAO, userDAO);
-            //gameService = new GameService();
+            gameService = new GameService(authDAO, gameDAO);
             userService = new UserService(authDAO, userDAO);
         } catch (Exception exception) {
             System.out.println(exception);
@@ -46,51 +46,55 @@ public class Server {
         javalin.post("/user", this::registerHandler);
         javalin.post("/session", this::loginHandler);
         javalin.delete("/session", this::logoutHandler);
-
+        javalin.post("/game", this::createGameHandler);
     }
 
-    private void failureHandler(String failure_msg, Context context) {
-        if (failure_msg == null) {
+    private void failureHandler(String failureMsg, Context context) {
+        if (failureMsg == null) {
             context.status(200);
-        } else if (failure_msg.equals("Error: bad request")) {
+        } else if (failureMsg.equals("Error: bad request")) {
             context.status(400);
-        } else if (failure_msg.equals("Error: unauthorized")) {
+        } else if (failureMsg.equals("Error: unauthorized")) {
             context.status(401);
-        } else if (failure_msg.equals("Error: already taken")) {
+        } else if (failureMsg.equals("Error: already taken")) {
             context.status(403);
         } else {
             context.status(500);
         }
     }
 
-    private Object clearHandler(@NotNull Context context) throws DataAccessException {
+    private void clearHandler(@NotNull Context context) throws DataAccessException {
         clearService.clearDatabase();
         context.status(200);
-        return "{}";
     }
 
-    private Object registerHandler(@NotNull Context context) {
+    private void registerHandler(@NotNull Context context) {
         RegisterRequest request = new Gson().fromJson(context.body(), RegisterRequest.class);
         RegisterResult result = userService.register(request);
         failureHandler(result.message(), context);
         context.result(new Gson().toJson(result));
-        return new Gson().toJson(result);
     }
 
-    private Object loginHandler(@NotNull Context context) {
+    private void loginHandler(@NotNull Context context) {
         LoginRequest request = new Gson().fromJson(context.body(), LoginRequest.class);
         LoginResult result = userService.login(request);
         failureHandler(result.message(), context);
         context.result(new Gson().toJson(result));
-        return new Gson().toJson(result);
     }
 
-    private Object logoutHandler(@NotNull Context context) {
+    private void logoutHandler(@NotNull Context context) {
         LogoutRequest request = new LogoutRequest(context.header("authorization"));
         LogoutResult result = userService.logout(request);
         failureHandler(result.message(), context);
         context.result(new Gson().toJson(result));
-        return new Gson().toJson(result);
+    }
+
+    private void createGameHandler(@NotNull Context context) {
+        String gameName = new Gson().fromJson(context.body(), CreateGameRequest.class).gameName();
+        CreateGameRequest request = new CreateGameRequest(context.header("Authorization"), gameName);
+        CreateGameResult result = gameService.createGame(request);
+        failureHandler(result.message(), context);
+        context.result(new Gson().toJson(result));
     }
 
     public int run(int desiredPort) {

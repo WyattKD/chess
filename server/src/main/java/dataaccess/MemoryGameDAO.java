@@ -1,49 +1,55 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.GameData;
 
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Random;
 
 public class MemoryGameDAO implements dataaccess.GameDAO {
 
-    HashSet<GameData> db;
+    HashMap<Integer, GameData> db;
 
     public MemoryGameDAO() {
-        db = HashSet.newHashSet(16);
+        db = HashMap.newHashMap(16);
     }
 
     @Override
-    public void createGame(GameData game) {
-        db.add(game);
+    public int createGame(String gameName) throws DataAccessException {
+
+        int gameID = new Random().nextInt(1, 1000);
+        int i = 0;
+        while (db.containsKey(gameID) && i < 5) {
+            gameID = new Random().nextInt(1, 1000);
+            i++;
+        }
+        if (i == 5 && db.containsKey(gameID)) {
+            throw new DataAccessException("Error: too many games");
+        }
+        GameData gameData = new GameData(gameID, null, null, gameName, new ChessGame());
+
+        db.put(gameData.gameID(), gameData);
+        return gameData.gameID();
     }
 
     @Override
     public void updateGame(GameData game) {
-        try {
-            db.remove(getGame(game.gameID()));
-            db.add(game);
-        } catch (DataAccessException e) {
-            db.add(game);
-        }
+        db.remove(game.gameID());
+        db.put(game.gameID(), game);
     }
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
-        for (GameData game : db) {
-            if (game.gameID() == gameID) {
-                return game;
-            }
-        }
-        throw new DataAccessException("Game not found, id: " +gameID);
+        return db.get(gameID);
     }
 
     @Override
-    public HashSet<GameData> listGames() {
+    public HashMap<Integer, GameData> listGames() {
         return db;
     }
 
     @Override
     public void clear() {
-        db = HashSet.newHashSet(16);
+        db = HashMap.newHashMap(16);
     }
 }
