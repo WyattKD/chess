@@ -1,4 +1,4 @@
-package passoff.server;
+package service;
 
 import chess.ChessGame;
 import dataaccess.*;
@@ -9,9 +9,6 @@ import model.requests.*;
 import model.results.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.*;
-import service.ClearService;
-import service.GameService;
-import service.UserService;
 
 import java.util.Collection;
 
