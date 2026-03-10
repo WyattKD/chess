@@ -15,5 +15,14 @@
     <orderEntry type="library" name="google.code.gson" level="project" />
     <orderEntry type="library" name="io.javalin" level="project" />
     <orderEntry type="library" name="slf4j.simple" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/Downloads/mysql-connector-j-9.6.0/mysql-connector-j-9.6.0/mysql-connector-j-9.6.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

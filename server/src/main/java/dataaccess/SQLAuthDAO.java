@@ -10,14 +10,28 @@ import java.util.UUID;
 
 public class SQLAuthDAO implements dataaccess.AuthDAO {
 
-    public SQLAuthDAO() throws DataAccessException {
-        DatabaseManager.createDatabase();
+    public SQLAuthDAO() {
+        try { DatabaseManager.createDatabase(); } catch (DataAccessException ex) {
+            throw new RuntimeException(ex);
+        }
+        try (var conn = DatabaseManager.getConnection()) {
+            var createTestTable = """            
+                    CREATE TABLE if NOT EXISTS auth (
+                                    username VARCHAR(255) NOT NULL,
+                                    authToken VARCHAR(255) NOT NULL,
+                                    PRIMARY KEY (authToken)
+                                    )""";
+            try (var createTableStatement = conn.prepareStatement(createTestTable)) {
+                createTableStatement.executeUpdate();
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public AuthData createAuth(UserData userData) throws DataAccessException {
         String authToken = UUID.randomUUID().toString();
-        deleteAuth(authToken);
         try (var conn = DatabaseManager.getConnection()) {
             try (var statement = conn.prepareStatement("INSERT INTO auth (username, authToken) VALUES(?, ?)")) {
                 statement.setString(1, userData.username());
@@ -27,16 +41,16 @@ public class SQLAuthDAO implements dataaccess.AuthDAO {
         } catch (SQLException | DataAccessException exception) {
             throw new DataAccessException(exception.getMessage());
         }
-        return new AuthData(authToken, userData.username());
+        return new AuthData(userData.username(), authToken);
     }
 
     @Override
     public Boolean deleteAuth(String authToken) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection() ) {
-            try (var statement = conn.prepareStatement("DELETE FROM auth WHERE authToken=?")) {
+            try (var statement = conn.prepareStatement("DELETE FROM auth WHERE authToken = ?")) {
                 statement.setString(1, authToken);
-                statement.executeUpdate();
-                return true;
+                int rowsAffected = statement.executeUpdate();
+                return rowsAffected > 0;
             }
         } catch (SQLException | DataAccessException exception) {
             return false;
