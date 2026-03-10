@@ -50,10 +50,14 @@ public class SQLAuthDAO implements dataaccess.AuthDAO {
             try (var statement = conn.prepareStatement("DELETE FROM auth WHERE authToken = ?")) {
                 statement.setString(1, authToken);
                 int rowsAffected = statement.executeUpdate();
-                return rowsAffected > 0;
+                if (rowsAffected > 0) {
+                    return true;
+                } else {
+                    throw new DataAccessException("unauthorized");
+                }
             }
         } catch (SQLException | DataAccessException exception) {
-            return false;
+            throw new DataAccessException("unauthorized");
         }
     }
 

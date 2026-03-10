@@ -31,7 +31,7 @@ public class Server {
         // Register your endpoints and exception handlers here.
         try {
 
-            authDAO = new MemoryAuthDAO();
+            authDAO = new SQLAuthDAO();
             gameDAO = new MemoryGameDAO();
             userDAO = new MemoryUserDAO();
 
