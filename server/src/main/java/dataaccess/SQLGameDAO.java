@@ -34,6 +34,9 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public int createGame(String game) throws DataAccessException {
+        if (game == null) {
+            throw new DataAccessException("bad request");
+        }
         int gameID = new Random().nextInt(1, 1000);
         try (var conn = DatabaseManager.getConnection()) {
             try (var statement = conn.prepareStatement("INSERT INTO game (gameID, whiteUsername, blackUsername, gameName, chessGame) VALUES(?, ?, ?, ?, ?)")) {

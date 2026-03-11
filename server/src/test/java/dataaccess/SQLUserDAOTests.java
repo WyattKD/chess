@@ -2,9 +2,7 @@ package dataaccess;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import org.junit.jupiter.api.*;
-
 import model.UserData;
 
 public class SQLUserDAOTests {
