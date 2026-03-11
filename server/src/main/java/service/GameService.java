@@ -42,8 +42,12 @@ public class GameService {
             if (authData == null) {
                 throw new DataAccessException(null);
             }
-        } catch (DataAccessException e) {
-            return new ListGamesResult(null, "Error: unauthorized");
+        } catch (DataAccessException exception) {
+            if (exception.getMessage().contains("connection")) {
+                return new ListGamesResult(null, "Error: " + exception.getMessage());
+            } else {
+                return new ListGamesResult(null, "Error: unauthorized");
+            }
         }
 
         try {

@@ -24,8 +24,8 @@ public class SQLAuthDAO implements dataaccess.AuthDAO {
             try (var createTableStatement = conn.prepareStatement(createTestTable)) {
                 createTableStatement.executeUpdate();
             }
-        } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException | DataAccessException exception) {
+            throw new RuntimeException(exception);
         }
     }
 
@@ -57,7 +57,11 @@ public class SQLAuthDAO implements dataaccess.AuthDAO {
                 }
             }
         } catch (SQLException | DataAccessException exception) {
-            throw new DataAccessException("unauthorized");
+            if (exception.getMessage().contains("connection")) {
+                throw new DataAccessException(exception.getMessage());
+            } else {
+                throw new DataAccessException("unauthorized");
+            }
         }
     }
 

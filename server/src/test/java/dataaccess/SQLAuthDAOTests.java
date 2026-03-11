@@ -59,8 +59,10 @@ public class SQLAuthDAOTests {
 
     @Test
     @DisplayName("Negative Delete")
-    void testDeleteAuthNegative() throws DataAccessException {
-        Assertions.assertFalse(authDAO.deleteAuth("fake"));
+    void testDeleteAuthNegative() {
+        Assertions.assertThrows(DataAccessException.class, () -> {
+            authDAO.deleteAuth("fake");
+        });
     }
 
     @Test

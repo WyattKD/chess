@@ -27,8 +27,8 @@ public class SQLGameDAO implements GameDAO {
             try (var createTableStatement = conn.prepareStatement(createTestTable)) {
                 createTableStatement.executeUpdate();
             }
-        } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException | DataAccessException exception) {
+            throw new RuntimeException(exception);
         }
     }
 

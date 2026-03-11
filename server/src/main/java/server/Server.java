@@ -66,8 +66,9 @@ public class Server {
     }
 
     private void clearHandler(@NotNull Context context) throws DataAccessException {
-        clearService.clearDatabase();
-        context.status(200);
+        ClearResult result = clearService.clearDatabase();
+        failureHandler(result.message(), context);
+        context.result(new Gson().toJson(result));
     }
 
     private void registerHandler(@NotNull Context context) {

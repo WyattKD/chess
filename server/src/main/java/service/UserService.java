@@ -53,7 +53,11 @@ public class UserService {
             authDAO.deleteAuth(logoutRequest.authToken());
             return new LogoutResult(null);
         } catch (DataAccessException exception) {
-            return new LogoutResult("Error: unauthorized");
+            if (exception.getMessage().contains("connection")) {
+                return new LogoutResult("Error: " + exception.getMessage());
+            } else {
+                return new LogoutResult("Error: unauthorized");
+            }
         }
 
 

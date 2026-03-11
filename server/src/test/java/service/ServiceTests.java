@@ -30,7 +30,7 @@ public class ServiceTests {
     static void init() throws DataAccessException {
         gameDAO = new MemoryGameDAO();
         authDAO = new MemoryAuthDAO();
-        userDAO = new MemoryUserDAO();
+        userDAO = new SQLUserDAO();
         gameService = new GameService(authDAO, gameDAO);
         userService = new UserService(authDAO, userDAO);
 
