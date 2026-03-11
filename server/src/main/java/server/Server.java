@@ -32,7 +32,7 @@ public class Server {
         try {
 
             authDAO = new SQLAuthDAO();
-            gameDAO = new MemoryGameDAO();
+            gameDAO = new SQLGameDAO();
             userDAO = new SQLUserDAO();
 
             clearService = new ClearService(authDAO, gameDAO, userDAO);

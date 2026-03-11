@@ -21,7 +21,7 @@ public class SQLGameDAO implements GameDAO {
                                     whiteUsername VARCHAR(255),
                                     blackUsername VARCHAR(255),
                                     gameName VARCHAR(255),
-                                    chessGame TEXT,
+                                    chessGame LONGTEXT NOT NULL,
                                     PRIMARY KEY (gameID)
                                     )""";
             try (var createTableStatement = conn.prepareStatement(createTestTable)) {
@@ -62,6 +62,7 @@ public class SQLGameDAO implements GameDAO {
                 statement.setString(3, gameData.gameName());
                 statement.setString(4, new Gson().toJson(gameData.game()));
                 statement.setInt(5, gameData.gameID());
+                statement.executeUpdate();
             }
         } catch (SQLException exception) {
             throw new DataAccessException(exception.getMessage());
