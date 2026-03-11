@@ -39,7 +39,8 @@ public class SQLGameDAO implements GameDAO {
         }
         int gameID = new Random().nextInt(1, 1000);
         try (var conn = DatabaseManager.getConnection()) {
-            try (var statement = conn.prepareStatement("INSERT INTO game (gameID, whiteUsername, blackUsername, gameName, chessGame) VALUES(?, ?, ?, ?, ?)")) {
+            try (var statement =
+                         conn.prepareStatement("INSERT INTO game (gameID, whiteUsername, blackUsername, gameName, chessGame) VALUES(?, ?, ?, ?, ?)")) {
                 statement.setInt(1, gameID);
                 statement.setString(2, null);
                 statement.setString(3, null);
