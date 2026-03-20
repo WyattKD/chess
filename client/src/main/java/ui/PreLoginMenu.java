@@ -1,6 +1,8 @@
 package ui;
 
 import client.ServerFacade;
+import model.results.LoginResult;
+import model.results.RegisterResult;
 
 import java.util.Scanner;
 
@@ -52,7 +54,7 @@ public class PreLoginMenu {
                     System.out.print(EscapeSequences.SET_TEXT_COLOR_GREEN + "register <USERNAME> <PASSWORD> <EMAIL> - to create an account");
                     break;
                 }
-                register(input);
+                register(input[1], input[2], input[3]);
                 break;
 
             case "login":
@@ -61,7 +63,7 @@ public class PreLoginMenu {
                     System.out.print(EscapeSequences.SET_TEXT_COLOR_GREEN + "login <USERNAME> <PASSWORD> - to play a game");
                     break;
                 }
-                login(input);
+                login(input[1], input[2]);
                 break;
 
             default:
@@ -70,7 +72,24 @@ public class PreLoginMenu {
         }
     }
 
-    private void login(String[] args){}
+    private void register(String username, String password, String email) {
+        if (server.register(username, password, email)) {
+            System.out.println(EscapeSequences.SET_TEXT_COLOR_BLUE + "Successfully registered!");
+            // PostLoginMenu runs
+        } else {
+            System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Username already taken");
+            System.out.print(EscapeSequences.SET_TEXT_COLOR_GREEN + "register <USERNAME> <PASSWORD> <EMAIL> - to create an account");
 
-    private void register(String[] args){}
+        }
+    }
+
+    private void login(String username, String password) {
+        if (server.login(username, password)) {
+            System.out.println(EscapeSequences.SET_TEXT_COLOR_BLUE + "Successfully logged in!");
+            // PostLoginMenu runs
+        } else {
+            System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Username or password incorrect, please try again");
+            System.out.print(EscapeSequences.SET_TEXT_COLOR_GREEN + "login <USERNAME> <PASSWORD> - to play a game");
+        }
+    }
 }
