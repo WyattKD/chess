@@ -12,11 +12,18 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ServerFacade {
-    private final String serverURL;
+    private String serverURL;
     public String authToken;
+    String serverDomain;
 
-    public ServerFacade() {
+    public ServerFacade() throws Exception {
+        this("localhost:8080");
         serverURL = "http://localhost:8080";
+    }
+
+    public ServerFacade(String serverDomain) throws Exception {
+        this.serverDomain = serverDomain;
+        serverURL = serverDomain;
     }
 
     public boolean register(String username, String password, String email) {

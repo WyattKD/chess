@@ -120,9 +120,13 @@ public class Server {
         return javalin.port();
     }
 
-
+    public void clear() throws DataAccessException {
+        ClearResult _ = clearService.clearDatabase();
+    }
 
     public void stop() {
         javalin.stop();
     }
+
+
 }

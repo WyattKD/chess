@@ -38,10 +38,10 @@ public class PreLoginMenu {
     private void eval(String[] input) {
         switch (input[0].toLowerCase()) {
             case "help":
-                System.out.print(EscapeSequences.SET_TEXT_COLOR_GREEN + "register <USERNAME> <PASSWORD> <EMAIL> - to create an account");
-                System.out.print(EscapeSequences.SET_TEXT_COLOR_GREEN + "login <USERNAME> <PASSWORD> - to play a game");
-                System.out.print(EscapeSequences.SET_TEXT_COLOR_GREEN + "quit - to stop playing chess");
-                System.out.print(EscapeSequences.SET_TEXT_COLOR_GREEN + "help - to display this help message");
+                System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "register <USERNAME> <PASSWORD> <EMAIL> - to create an account");
+                System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "login <USERNAME> <PASSWORD> - to play a game");
+                System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "quit - to stop playing chess");
+                System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "help - to display this help message");
                 break;
 
             case "quit":
@@ -51,7 +51,7 @@ public class PreLoginMenu {
             case "register":
                 if (input.length != 4) {
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "incorrect number of arguments");
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_GREEN + "register <USERNAME> <PASSWORD> <EMAIL> - to create an account");
+                    System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "register <USERNAME> <PASSWORD> <EMAIL> - to create an account");
                     break;
                 }
                 register(input[1], input[2], input[3]);
@@ -60,7 +60,7 @@ public class PreLoginMenu {
             case "login":
                 if (input.length != 3) {
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "incorrect number of arguments");
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_GREEN + "login <USERNAME> <PASSWORD> - to play a game");
+                    System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "login <USERNAME> <PASSWORD> - to play a game");
                     break;
                 }
                 login(input[1], input[2]);
@@ -78,7 +78,7 @@ public class PreLoginMenu {
             // PostLoginMenu runs
         } else {
             System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Username already taken");
-            System.out.print(EscapeSequences.SET_TEXT_COLOR_GREEN + "register <USERNAME> <PASSWORD> <EMAIL> - to create an account");
+            System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "register <USERNAME> <PASSWORD> <EMAIL> - to create an account");
 
         }
     }
@@ -89,7 +89,7 @@ public class PreLoginMenu {
             // PostLoginMenu runs
         } else {
             System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Username or password incorrect, please try again");
-            System.out.print(EscapeSequences.SET_TEXT_COLOR_GREEN + "login <USERNAME> <PASSWORD> - to play a game");
+            System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "login <USERNAME> <PASSWORD> - to play a game");
         }
     }
 }
