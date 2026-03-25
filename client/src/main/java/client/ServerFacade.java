@@ -1,6 +1,8 @@
 package client;
 
 import com.google.gson.Gson;
+import model.GameData;
+import model.GamesList;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +10,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 
@@ -67,6 +70,16 @@ public class ServerFacade {
         return (int) gameID;
     }
 
+    public HashSet<GameData> listGames() {
+        String resp = requestString("GET", "/game", null);
+        if (resp.contains("Error")) {
+            return HashSet.newHashSet(8);
+        }
+        GamesList games = new Gson().fromJson(resp, GamesList.class);
+
+        return games.games();
+    }
+
     private Map request(String method, String endpoint, String body) {
         Map respMap;
         try {
@@ -93,6 +106,32 @@ public class ServerFacade {
         return respMap;
     }
 
+    private String requestString(String method, String endpoint, String body) {
+        String resp;
+        try {
+            HttpURLConnection http = makeConnection(method, endpoint, body);
+
+            try {
+                if (http.getResponseCode() == 401) {
+                    return "Error: 401";
+                }
+            } catch (IOException e) {
+                return "Error: 401";
+            }
+
+
+            try (InputStream respBody = http.getInputStream()) {
+                InputStreamReader inputStreamReader = new InputStreamReader(respBody);
+                resp = readerToString(inputStreamReader);
+            }
+
+        } catch (URISyntaxException | IOException exception) {
+            return String.format("Error: %s", exception.getMessage());
+        }
+
+        return resp;
+    }
+
     private HttpURLConnection makeConnection(String method, String endpoint, String body) throws URISyntaxException, IOException {
         URI uri = new URI(serverURL + endpoint);
         HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
@@ -112,5 +151,18 @@ public class ServerFacade {
 
         http.connect();
         return http;
+    }
+
+    private String readerToString(InputStreamReader reader) {
+        StringBuilder sb = new StringBuilder();
+        try {
+            for (int ch; (ch = reader.read()) != -1; ) {
+                sb.append((char) ch);
+            }
+            return sb.toString();
+        } catch (IOException e) {
+            return "";
+        }
+
     }
 }

@@ -2,15 +2,16 @@ package ui;
 
 import client.ServerFacade;
 import chess.*;
+import model.GameData;
 
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
 
 public class PostLoginMenu {
     private final String username;
     private final Scanner scanner;
     private HashMap<Integer, Integer> gameMap = new HashMap<>();
     ServerFacade serverFacade;
+    List<GameData> games;
 
     public PostLoginMenu(ServerFacade serverFacade, String username, Scanner scanner) {
         this.serverFacade = serverFacade;
@@ -60,10 +61,14 @@ public class PostLoginMenu {
                 break;
 
             case "list":
-                if (gameMap.isEmpty()) {
-                    System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "there are currently no games");
-                } else {
-                    // serverFacade.listGames()
+                games = new ArrayList<>();
+                HashSet<GameData> gameList = serverFacade.listGames();
+                games.addAll(gameList);
+                for (int i = 0; i < games.size(); i++) {
+                    GameData game = games.get(i);
+                    String whiteUser = game.whiteUsername() != null ? game.whiteUsername() : "open";
+                    String blackUser = game.blackUsername() != null ? game.blackUsername() : "open";
+                    System.out.printf("%d -- Game: %s  |  White User: %s  |  Black User: %s %n", i, game.gameName(), whiteUser, blackUser);
                 }
                 break;
 

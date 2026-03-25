@@ -4,6 +4,8 @@ import dataaccess.DataAccessException;
 import org.junit.jupiter.api.*;
 import server.Server;
 
+import java.util.HashSet;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -62,7 +64,7 @@ public class ServerFacadeTests {
     @DisplayName("Login Negative")
     public void loginNegative() {
         serverFacade.register("username", "password", "email");
-        assertFalse(serverFacade.login("username", "pass"));
+        assertFalse(serverFacade.login("username", "incorrect"));
     }
 
     @Test
@@ -82,13 +84,27 @@ public class ServerFacadeTests {
     @DisplayName("Create Game Positive")
     public void createGamePositive() {
         serverFacade.register("username", "password", "email");
-        assertTrue(serverFacade.createGame("name") >= 0);
+        assertTrue(serverFacade.createGame("game") >= 0);
     }
 
     @Test
     @DisplayName("Create Game Negative")
     public void createGameNegative() {
         assertTrue(serverFacade.createGame("name") == -1);
+    }
+
+    @Test
+    @DisplayName("List Game Positive")
+    public void listGamesPositive() {
+        serverFacade.register("username", "password", "email");
+        serverFacade.createGame("game");
+        assertEquals(1, serverFacade.listGames().size());
+    }
+
+    @Test
+    @DisplayName("List Game Negative")
+    public void listGamesNegative() {
+        assertEquals(serverFacade.listGames(), HashSet.newHashSet(8));
     }
 
 }
