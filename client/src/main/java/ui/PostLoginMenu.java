@@ -25,7 +25,7 @@ public class PostLoginMenu {
     public boolean run() {
         String input = "";
         while (true) {
-            System.out.print("\n[LOGGED IN] >>> ");
+            System.out.print(EscapeSequences.SET_TEXT_COLOR_GREEN + "\n[" + username + "] >>> ");
             input = scanner.nextLine();
             if (input.equals("logout")) {
                 System.out.println("Logged out " + username);
@@ -67,6 +67,9 @@ public class PostLoginMenu {
                 break;
 
             case "join":
+                games = new ArrayList<>();
+                HashSet<GameData> gameList = serverFacade.listGames();
+                games.addAll(gameList);
                 if (input.length != 3 || (!input[2].equalsIgnoreCase("WHITE") && !input[2].equalsIgnoreCase("BLACK"))) {
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "incorrect number of arguments");
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "join <ID> [WHITE|BLACK] - a game");
@@ -99,16 +102,24 @@ public class PostLoginMenu {
                 break;
 
             case "observe":
+                games = new ArrayList<>();
+                HashSet<GameData> gamesList = serverFacade.listGames();
+                games.addAll(gamesList);
                 if (input.length != 2) {
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "incorrect number of arguments");
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "observe <ID> - a game");
                     break;
                 }
-                GameData game = games.get(Integer.parseInt(input[1]));
-                if (game == null) {
+                try {
+                    GameData game = games.get(Integer.parseInt(input[1]));
+                    if (game == null) {
+                        System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Game not found");
+                    } else {
+                        printChessBoard(game.game(), true);
+                    }
+                } catch (Exception exception) {
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Game not found");
-                } else {
-                    printChessBoard(game.game(), true);
+                    printGames(games, serverFacade);
                 }
                 // serverFacade.observe()
                 break;
@@ -203,11 +214,12 @@ public class PostLoginMenu {
         games = new ArrayList<>();
         HashSet<GameData> gameList = sf.listGames();
         games.addAll(gameList);
+        System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "-== GAMES ==-");
         for (int i = 0; i < games.size(); i++) {
             GameData game = (GameData) games.get(i);
             String whiteUser = game.whiteUsername() != null ? game.whiteUsername() : "open";
             String blackUser = game.blackUsername() != null ? game.blackUsername() : "open";
-            System.out.printf(EscapeSequences.SET_TEXT_COLOR_GREEN + "%d -- Game: %s  |  White: %s  |  Black: %s %n",
+            System.out.printf(EscapeSequences.SET_TEXT_COLOR_GREEN + " ID: %d - %s  ->  White: %s  |  Black: %s %n",
                     i, game.gameName(), whiteUser, blackUser);
         }
     }

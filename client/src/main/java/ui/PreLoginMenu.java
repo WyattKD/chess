@@ -1,24 +1,27 @@
 package ui;
 
 import client.ServerFacade;
-import model.results.LoginResult;
-import model.results.RegisterResult;
+import java.util.Random;
 
 import java.util.Scanner;
 
 public class PreLoginMenu {
     ServerFacade server;
     private Scanner scanner;
+    private int guestNumber;
 
     public PreLoginMenu(ServerFacade server) {
         this.server = server;
         scanner = new Scanner(System.in);
+        Random rand = new Random();
+        guestNumber = rand.nextInt(999) + 1;
     }
 
     public void run() {
         String input = "";
+
         while (!input.equals("quit")) {
-            System.out.printf("\n[LOGGED OUT] >>> ");
+            System.out.printf(EscapeSequences.SET_TEXT_COLOR_RED + "\n[Guest#" + guestNumber + "] >>> ");
             try {
                 input = scanner.nextLine();
                 if (input.equals("quit")) {
