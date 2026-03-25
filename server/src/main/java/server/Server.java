@@ -121,7 +121,7 @@ public class Server {
     }
 
     public void clear() throws DataAccessException {
-        ClearResult _ = clearService.clearDatabase();
+        ClearResult clear = clearService.clearDatabase();
     }
 
     public void stop() {
