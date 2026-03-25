@@ -107,4 +107,21 @@ public class ServerFacadeTests {
         assertEquals(serverFacade.listGames(), HashSet.newHashSet(8));
     }
 
+    @Test
+    @DisplayName("Join Game Positive")
+    public void joinGamePositive() {
+        serverFacade.register("username", "password", "email");
+        int id = serverFacade.createGame("gameName");
+        assertTrue(serverFacade.joinGame(id, "WHITE"));
+    }
+
+    @Test
+    @DisplayName("Join Game Negative")
+    public void joinGameNegative() {
+        serverFacade.register("username", "password", "email");
+        int id = serverFacade.createGame("gameName");
+        serverFacade.joinGame(id, "WHITE");
+        assertFalse(serverFacade.joinGame(id, "WHITE"));
+    }
+
 }
