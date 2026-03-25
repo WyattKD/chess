@@ -157,9 +157,9 @@ public class PostLoginMenu {
                 int properRow = whiteView ? 8 - r : r + 1;
                 int properCol = whiteView ? c + 1 : 8 - c;
                 if ((r + c) % 2 != 0) {
-                    out.print(EscapeSequences.SET_BG_COLOR_GREEN);
-                } else {
                     out.print(EscapeSequences.SET_BG_COLOR_DARK_GREEN);
+                } else {
+                    out.print(EscapeSequences.SET_BG_COLOR_GREEN);
                 }
                 ChessPiece piece = game.getBoard().getPiece(new ChessPosition(properRow, properCol));
                 if (piece != null) {
@@ -169,9 +169,6 @@ public class PostLoginMenu {
                 }
             }
             out.println(EscapeSequences.SET_TEXT_COLOR_BLUE + EscapeSequences.SET_BG_COLOR_DARK_GREY + " " + rows.get(r) + " ");
-        }
-        if (!whiteView) {
-            columns = new ArrayList<>(columns.reversed());
         }
         out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
         out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
