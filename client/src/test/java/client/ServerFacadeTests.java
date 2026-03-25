@@ -66,4 +66,17 @@ public class ServerFacadeTests {
         assertFalse(serverFacade.login("username", "pass"));
     }
 
+    @Test
+    @DisplayName("Logout Positive")
+    public void logoutPositive() {
+        serverFacade.register("username", "password", "email");
+        assertTrue(serverFacade.logout());
+    }
+
+    @Test
+    @DisplayName("Logout Negative")
+    public void logoutNegative() {
+        assertFalse(serverFacade.logout());
+    }
+
 }

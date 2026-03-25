@@ -26,6 +26,7 @@ public class PostLoginMenu {
             input = scanner.nextLine();
             if (input.equals("logout")) {
                 System.out.println("Logged out " + username);
+                serverFacade.logout();
                 return false;
             } else if (input.equals("quit")) {
                 return true;

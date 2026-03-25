@@ -47,6 +47,14 @@ public class ServerFacade {
         authToken = (String) resp.get("authToken");
         return true;
     }
+    public boolean logout() {
+        Map resp = request("DELETE", "/session", null);
+        if (resp.containsKey("Error")) {
+            return false;
+        }
+        authToken = null;
+        return true;
+    }
 
     private Map request(String method, String endpoint, String body) {
         Map respMap;
