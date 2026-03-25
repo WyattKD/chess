@@ -177,17 +177,23 @@ public class PostLoginMenu {
     private static String getRenderedPiece(ChessPiece piece) {
         switch (piece.getPieceType()) {
             case KING:
-                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.SET_TEXT_COLOR_WHITE + " K " : EscapeSequences.SET_TEXT_COLOR_BLACK + " k ";
+                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.SET_TEXT_COLOR_WHITE + " K "
+                        : EscapeSequences.SET_TEXT_COLOR_BLACK + " k ";
             case QUEEN:
-                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.SET_TEXT_COLOR_WHITE + " Q " : EscapeSequences.SET_TEXT_COLOR_BLACK + " q ";
+                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.SET_TEXT_COLOR_WHITE + " Q "
+                        : EscapeSequences.SET_TEXT_COLOR_BLACK + " q ";
             case ROOK:
-                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.SET_TEXT_COLOR_WHITE + " R " : EscapeSequences.SET_TEXT_COLOR_BLACK + " r ";
+                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.SET_TEXT_COLOR_WHITE + " R "
+                        : EscapeSequences.SET_TEXT_COLOR_BLACK + " r ";
             case BISHOP:
-                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.SET_TEXT_COLOR_WHITE + " B " : EscapeSequences.SET_TEXT_COLOR_BLACK + " b ";
+                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.SET_TEXT_COLOR_WHITE + " B "
+                        : EscapeSequences.SET_TEXT_COLOR_BLACK + " b ";
             case KNIGHT:
-                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.SET_TEXT_COLOR_WHITE + " N " : EscapeSequences.SET_TEXT_COLOR_BLACK + " n ";
+                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.SET_TEXT_COLOR_WHITE + " N "
+                        : EscapeSequences.SET_TEXT_COLOR_BLACK + " n ";
             case PAWN:
-                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.SET_TEXT_COLOR_WHITE + " P " : EscapeSequences.SET_TEXT_COLOR_BLACK + " p ";
+                return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.SET_TEXT_COLOR_WHITE + " P "
+                        : EscapeSequences.SET_TEXT_COLOR_BLACK + " p ";
             default:
                 return EscapeSequences.EMPTY;
         }
@@ -201,7 +207,8 @@ public class PostLoginMenu {
             GameData game = (GameData) games.get(i);
             String whiteUser = game.whiteUsername() != null ? game.whiteUsername() : "open";
             String blackUser = game.blackUsername() != null ? game.blackUsername() : "open";
-            System.out.printf(EscapeSequences.SET_TEXT_COLOR_GREEN + "%d -- Game: %s  |  White: %s  |  Black: %s %n", i, game.gameName(), whiteUser, blackUser);
+            System.out.printf(EscapeSequences.SET_TEXT_COLOR_GREEN + "%d -- Game: %s  |  White: %s  |  Black: %s %n",
+                    i, game.gameName(), whiteUser, blackUser);
         }
     }
 
