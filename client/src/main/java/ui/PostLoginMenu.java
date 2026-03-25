@@ -13,7 +13,7 @@ public class PostLoginMenu {
     private final Scanner scanner;
     private HashMap<Integer, Integer> gameMap = new HashMap<>();
     ServerFacade serverFacade;
-    List<GameData> games;
+    ArrayList<GameData> games;
 
     public PostLoginMenu(ServerFacade serverFacade, String username, Scanner scanner) {
         this.serverFacade = serverFacade;
@@ -63,15 +63,7 @@ public class PostLoginMenu {
                 break;
 
             case "list":
-                games = new ArrayList<>();
-                HashSet<GameData> gameList = serverFacade.listGames();
-                games.addAll(gameList);
-                for (int i = 0; i < games.size(); i++) {
-                    GameData game = games.get(i);
-                    String whiteUser = game.whiteUsername() != null ? game.whiteUsername() : "open";
-                    String blackUser = game.blackUsername() != null ? game.blackUsername() : "open";
-                    System.out.printf(EscapeSequences.SET_TEXT_COLOR_GREEN + "%d -- Game: %s  |  White: %s  |  Black: %s %n", i, game.gameName(), whiteUser, blackUser);
-                }
+                printGames(games, serverFacade);
                 break;
 
             case "join":
@@ -90,12 +82,7 @@ public class PostLoginMenu {
                         }
                         if (games.size() <= gameNum) {
                             System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Game ID does not exist");
-                            for (int i = 0; i < games.size(); i++) {
-                                GameData game = games.get(i);
-                                String whiteUser = game.whiteUsername() != null ? game.whiteUsername() : "open";
-                                String blackUser = game.blackUsername() != null ? game.blackUsername() : "open";
-                                System.out.printf(EscapeSequences.SET_TEXT_COLOR_GREEN + "%d -- Game: %s  |  White: %s  |  Black: %s %n", i, game.gameName(), whiteUser, blackUser);
-                            }
+                            printGames(games, serverFacade);
                             break;
                         }
                     }
@@ -203,6 +190,18 @@ public class PostLoginMenu {
                 return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.SET_TEXT_COLOR_WHITE + " P " : EscapeSequences.SET_TEXT_COLOR_BLACK + " p ";
             default:
                 return EscapeSequences.EMPTY;
+        }
+    }
+
+    static void printGames(ArrayList games, ServerFacade sf) {
+        games = new ArrayList<>();
+        HashSet<GameData> gameList = sf.listGames();
+        games.addAll(gameList);
+        for (int i = 0; i < games.size(); i++) {
+            GameData game = (GameData) games.get(i);
+            String whiteUser = game.whiteUsername() != null ? game.whiteUsername() : "open";
+            String blackUser = game.blackUsername() != null ? game.blackUsername() : "open";
+            System.out.printf(EscapeSequences.SET_TEXT_COLOR_GREEN + "%d -- Game: %s  |  White: %s  |  Black: %s %n", i, game.gameName(), whiteUser, blackUser);
         }
     }
 

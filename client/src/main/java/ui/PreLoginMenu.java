@@ -8,7 +8,6 @@ import java.util.Scanner;
 
 public class PreLoginMenu {
     ServerFacade server;
-    PostLoginMenu PostLoginMenu;
     private Scanner scanner;
 
     public PreLoginMenu(ServerFacade server) {
@@ -74,7 +73,6 @@ public class PreLoginMenu {
     private void register(String username, String password, String email) {
         if (server.register(username, password, email)) {
             System.out.println(EscapeSequences.SET_TEXT_COLOR_BLUE + "Successfully registered!");
-            // PostLoginMenu runs
             boolean isQuitting = new PostLoginMenu(server, username, scanner).run();
             if (isQuitting) {
                 System.out.println("Quitting...");
