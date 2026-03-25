@@ -13,7 +13,6 @@ public class PreLoginMenu {
 
     public PreLoginMenu(ServerFacade server) {
         this.server = server;
-        PostLoginMenu = new PostLoginMenu(server);
         scanner = new Scanner(System.in);
     }
 
@@ -76,17 +75,31 @@ public class PreLoginMenu {
         if (server.register(username, password, email)) {
             System.out.println(EscapeSequences.SET_TEXT_COLOR_BLUE + "Successfully registered!");
             // PostLoginMenu runs
+            boolean isQuitting = new PostLoginMenu(server, username, scanner).run();
+            if (isQuitting) {
+                System.out.println("Quitting...");
+                scanner.close();
+                System.exit(0);
+            } else {
+                System.out.println("♕ 240 Chess Client: enter \"help\" to get started");
+            }
         } else {
             System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Username already taken");
             System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "register <USERNAME> <PASSWORD> <EMAIL> - to create an account");
-
         }
     }
 
     private void login(String username, String password) {
         if (server.login(username, password)) {
             System.out.println(EscapeSequences.SET_TEXT_COLOR_BLUE + "Successfully logged in!");
-            // PostLoginMenu runs
+            boolean isQuitting = new PostLoginMenu(server, username, scanner).run();
+            if (isQuitting) {
+                System.out.println("Quitting...");
+                scanner.close();
+                System.exit(0);
+            } else {
+                System.out.println("♕ 240 Chess Client: enter \"help\" to get started");
+            }
         } else {
             System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Username or password incorrect, please try again");
             System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "login <USERNAME> <PASSWORD> - to play a game");

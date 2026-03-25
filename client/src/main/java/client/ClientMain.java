@@ -10,10 +10,9 @@ public class ClientMain {
         if (args.length == 1) {
             port = Integer.parseInt(args[0]);
         }
-        ServerFacade server = new ServerFacade("http://localhost:" + port);
+        ServerFacade serverFacade = new ServerFacade("http://localhost:" + port);
 
-        PreLoginMenu prelogin = new PreLoginMenu(server);
+        PreLoginMenu prelogin = new PreLoginMenu(serverFacade);
         prelogin.run();
-        System.out.println("Exited");
     }
 }
