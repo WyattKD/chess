@@ -117,6 +117,12 @@ public class PostLoginMenu {
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "observe <ID> - a game");
                     break;
                 }
+                GameData game = games.get(Integer.parseInt(input[1]));
+                if (game == null) {
+                    System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Game not found");
+                } else {
+                    printChessBoard(game.game(), true);
+                }
                 // serverFacade.observe()
                 break;
 
@@ -199,6 +205,5 @@ public class PostLoginMenu {
                 return EscapeSequences.EMPTY;
         }
     }
-
 
 }
