@@ -170,9 +170,6 @@ public class PostLoginMenu {
             }
             out.println(EscapeSequences.SET_TEXT_COLOR_BLUE + EscapeSequences.SET_BG_COLOR_DARK_GREY + " " + rows.get(r) + " ");
         }
-        if (!whiteView) {
-            columns = new ArrayList<>(columns.reversed());
-        }
         out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
         out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
         out.print(EscapeSequences.RESET_TEXT_COLOR);
