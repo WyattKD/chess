@@ -4,8 +4,7 @@ import dataaccess.DataAccessException;
 import org.junit.jupiter.api.*;
 import server.Server;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ServerFacadeTests {
@@ -77,6 +76,19 @@ public class ServerFacadeTests {
     @DisplayName("Logout Negative")
     public void logoutNegative() {
         assertFalse(serverFacade.logout());
+    }
+
+    @Test
+    @DisplayName("Create Game Positive")
+    public void createGamePositive() {
+        serverFacade.register("username", "password", "email");
+        assertTrue(serverFacade.createGame("name") >= 0);
+    }
+
+    @Test
+    @DisplayName("Create Game Negative")
+    public void createGameNegative() {
+        assertTrue(serverFacade.createGame("name") == -1);
     }
 
 }
