@@ -53,7 +53,10 @@ public class PostLoginMenu {
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "create <NAME> - a game");
                     break;
                 }
-                // serverFacade.createGame()
+                int id = serverFacade.createGame(input[1]);
+                if (id != -1) {
+                    System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "Game successfully created!");
+                }
                 break;
 
             case "list":

@@ -56,6 +56,17 @@ public class ServerFacade {
         return true;
     }
 
+    public int createGame(String gameName) {
+        var body = Map.of("gameName", gameName);
+        var jsonBody = new Gson().toJson(body);
+        Map resp = request("POST", "/game", jsonBody);
+        if (resp.containsKey("Error")) {
+            return -1;
+        }
+        double gameID = (double) resp.get("gameID");
+        return (int) gameID;
+    }
+
     private Map request(String method, String endpoint, String body) {
         Map respMap;
         try {
