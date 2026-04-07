@@ -2,6 +2,8 @@ package ui;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import client.ServerFacade;
 import websocket.WebsocketFacade;
 
@@ -27,13 +29,13 @@ public class LiveMenu {
 
     public void run(int gameID) throws Exception {
         this.gameID = gameID;
-        // this.socket.connect(client.server.authToken, gameID);
+        // this.socket.connect(server.authToken, gameID);
         String input = "";
         while (true) {
             System.out.printf("\n[GAME] >>> ");
             input = s.nextLine();
             if (input.equals("leave")) {
-                // this.socket.leaveGame(client.server.authToken, gameID);
+                // this.socket.leaveGame(server.authToken, gameID);
                 break;
             }
             eval(input.split(" "));
@@ -50,21 +52,20 @@ public class LiveMenu {
                 System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "leave - to stop playing");
                 System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "help - print this message");
                 break;
-
             case "redraw":
-                // renderGame();
+                renderGame(null, false);
                 break;
 
             case "move":
                 if (input.length == 4) {
-                    // interpretMove();
+                    interpretMove(input[1], input[2], input[3]);
                     break;
                 } else if (input.length != 3) {
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "incorrect number of arguments");
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "move <BEGIN> <END> <PROMOTION> - a piece, only promote if applicable");
                     break;
                 }
-                // interpretMove();
+                interpretMove(input[1], input[2], null);
                 break;
 
             case "highlight":
@@ -73,11 +74,11 @@ public class LiveMenu {
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "highlight <PIECE> - possible moves");
                     break;
                 }
-                // handleHighlight();
+                handleHighlight(input[1]);
                 break;
 
             case "resign":
-                // handleResign();
+                handleResign();
                 break;
 
             default:
@@ -111,7 +112,7 @@ public class LiveMenu {
     }
 
     private void handleHighlight(String pos) {
-        // renderGame(currentGame.validMoves(parsePosition(pos)), false);
+        renderGame(currentGame.validMoves(parsePosition(pos)), false);
     }
 
     private void handleResign() {
@@ -119,7 +120,7 @@ public class LiveMenu {
             System.out.print("Please confirm: (Y)es (N)o >>> ");
             String choice = s.nextLine();
             if (choice.charAt(0) == 'Y' || choice.charAt(0) == 'y') {
-                // socket.resignGame(client.server.authToken, gameID);
+                // socket.resignGame(server.authToken, gameID);
             } else {
                 System.out.println("OK, cancelling");
             }
@@ -127,5 +128,51 @@ public class LiveMenu {
             System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + e.getMessage());
         }
     }
+    private void interpretMove(String from, String to, String piece) {
+        try {
+            ChessPosition end = parsePosition(to);
+            ChessPosition start = parsePosition(from);
 
+            ChessMove move;
+            if (piece != null) {
+                switch (piece.toLowerCase()) {
+                    case "queen":
+                        move = new ChessMove(start, end, ChessPiece.PieceType.QUEEN);
+                        break;
+                    case "rook":
+                        move = new ChessMove(start, end, ChessPiece.PieceType.ROOK);
+                        break;
+                    case "bishop":
+                        move = new ChessMove(start, end, ChessPiece.PieceType.BISHOP);
+                        break;
+                    case "knight":
+                        move = new ChessMove(start, end, ChessPiece.PieceType.KNIGHT);
+                        break;
+                    default:
+                        throw new Exception("Invalid promotion piece!");
+                }
+            } else {
+                move = new ChessMove(start, end, null);
+            }
+
+            // this.socket.makeMove(server.authToken, gameID, move);
+        } catch (Exception e) {
+            System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + e.getMessage());
+        }
+    }
+
+    private ChessPosition parsePosition(String coordinate) {
+        if (coordinate.length() != 2) {
+            throw new IllegalArgumentException("invalid position format");
+        }
+
+        char col = coordinate.charAt(0);
+        int row = Character.getNumericValue(coordinate.charAt(1));
+
+        if (col < 'a' || col > 'h' || row < 1 || row > 8) {
+            throw new IllegalArgumentException("position out of bounds");
+        }
+
+        return new ChessPosition(row, col - 'a' + 1);
+    }
 }
