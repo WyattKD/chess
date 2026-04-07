@@ -17,15 +17,18 @@ import java.util.Objects;
 public class ServerFacade {
     private String serverURL;
     public String authToken;
+    public int port;
     String serverDomain;
 
     public ServerFacade() throws Exception {
         this("localhost:8080");
+        port = 8080;
         serverURL = "http://localhost:8080";
     }
 
     public ServerFacade(String serverDomain) throws Exception {
         this.serverDomain = serverDomain;
+        port = Integer.parseInt(serverDomain.replaceAll("[^0-9]", ""));
         serverURL = serverDomain;
     }
 
