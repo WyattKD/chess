@@ -1,18 +1,27 @@
 package ui;
 
+import chess.ChessGame;
+import chess.ChessMove;
 import client.ServerFacade;
 import websocket.WebsocketFacade;
+
+import java.util.Collection;
 import java.util.Scanner;
+
+import static ui.PostLoginMenu.printChessBoard;
 
 public class LiveMenu {
     private final ServerFacade server;
     private final Scanner s;
+    private final boolean black;
     private final WebsocketFacade socket;
     private int gameID;
+    private ChessGame currentGame = new ChessGame();
 
-    public LiveMenu(ServerFacade server, Scanner s) throws Exception {
+    public LiveMenu(ServerFacade server, Scanner s, boolean black) throws Exception {
         this.server = server;
         this.s = s;
+        this.black = black;
         socket = new WebsocketFacade();
     }
 
@@ -76,4 +85,47 @@ public class LiveMenu {
                 break;
         }
     }
+
+    public void updateGame(ChessGame game) {
+        currentGame = game;
+        renderGame(null, true);
+    }
+
+    public void renderGame(Collection<ChessMove> validMoves, boolean print) {
+        printChessBoard(currentGame, black, validMoves);
+        if (print) {
+            System.out.printf("\n[GAME] >>> ");
+        }
+    }
+
+    public void displayNotification(String n) {
+        System.out.print(EscapeSequences.ERASE_LINE + EscapeSequences.SET_BG_COLOR_BLUE);
+        System.out.println(n + EscapeSequences.RESET_BG_COLOR);
+        System.out.printf("\n[GAME] >>> ");
+    }
+
+    public void displayError(String e) {
+        System.out.print(EscapeSequences.ERASE_LINE + EscapeSequences.SET_BG_COLOR_BLUE);
+        System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + e + EscapeSequences.RESET_BG_COLOR);
+        System.out.printf("\n[GAME] >>> ");
+    }
+
+    private void handleHighlight(String pos) {
+        // renderGame(currentGame.validMoves(parsePosition(pos)), false);
+    }
+
+    private void handleResign() {
+        try {
+            System.out.print("Please confirm: (Y)es (N)o >>> ");
+            String choice = s.nextLine();
+            if (choice.charAt(0) == 'Y' || choice.charAt(0) == 'y') {
+                // socket.resignGame(client.server.authToken, gameID);
+            } else {
+                System.out.println("OK, cancelling");
+            }
+        } catch (Exception e) {
+            System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + e.getMessage());
+        }
+    }
+
 }

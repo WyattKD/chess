@@ -92,7 +92,7 @@ public class PostLoginMenu {
                     GameData game = games.get(gameNum);
                     if (serverFacade.joinGame(game.gameID(), input[2].toUpperCase())) {
                         System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "Successfully joined game!");
-                        printChessBoard(game.game(), input[2].equalsIgnoreCase("WHITE"));
+                        // printChessBoard(game.game(), input[2].equalsIgnoreCase("WHITE"), );
 
                     } else {
                         System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "That color is already taken");
@@ -115,7 +115,7 @@ public class PostLoginMenu {
                     if (game == null) {
                         System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Game not found");
                     } else {
-                        printChessBoard(game.game(), true);
+                        // printChessBoard(game.game(), true, );
                     }
                 } catch (Exception exception) {
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Game not found");
@@ -130,7 +130,7 @@ public class PostLoginMenu {
         }
     }
 
-    static void printChessBoard(ChessGame game, boolean whiteView) {
+    static void printChessBoard(ChessGame game, boolean whiteView, Collection<ChessMove> validMoves) {
         PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(EscapeSequences.ERASE_SCREEN);
         out.print(EscapeSequences.SET_TEXT_BOLD);
@@ -161,6 +161,7 @@ public class PostLoginMenu {
                 } else {
                     out.print(EscapeSequences.SET_BG_COLOR_GREEN);
                 }
+                highlightColor(out, r, c, validMoves);
                 ChessPiece piece = game.getBoard().getPiece(new ChessPosition(properRow, properCol));
                 if (piece != null) {
                     out.print(getRenderedPiece(piece));
@@ -221,4 +222,21 @@ public class PostLoginMenu {
         }
     }
 
+    static void highlightColor(PrintStream out, int r, int c, Collection<ChessMove> validMoves) {
+        if (validMoves != null) {
+            for (ChessMove m : validMoves) {
+                ChessPosition ep = m.getEndPosition();
+                ChessPosition sp = m.getStartPosition();
+                int startRow = sp.getRow();
+                int startCol = sp.getColumn();
+                int endRow = ep.getRow();
+                int endCol = ep.getColumn();
+                if (r == endRow && c == endCol) {
+                    out.print(EscapeSequences.SET_BG_COLOR_DARK_GREEN);
+                } else if (r == startRow && c == startCol) {
+                    out.print(EscapeSequences.SET_BG_COLOR_BLUE);
+                }
+            }
+        }
+    }
 }
