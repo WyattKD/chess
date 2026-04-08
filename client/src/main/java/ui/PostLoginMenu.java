@@ -70,10 +70,15 @@ public class PostLoginMenu {
                 games = new ArrayList<>();
                 HashSet<GameData> gameList = serverFacade.listGames();
                 games.addAll(gameList);
-                if (input.length != 3 || (!input[2].equalsIgnoreCase("WHITE") && !input[2].equalsIgnoreCase("BLACK"))) {
+                String pattern = "^-?\\d+$";
+                if (input.length != 3) {
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "incorrect number of arguments");
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "join <ID> [WHITE|BLACK] - a game");
-                } else {
+                } else if (!input[1].matches(pattern)  || (!input[2].equalsIgnoreCase("WHITE") && !input[2].equalsIgnoreCase("BLACK"))) {
+                    System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "invalid join id or team color");
+                    System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "join <ID> [WHITE|BLACK] - a game");
+                }
+                else {
                     int gameNum = Integer.parseInt(input[1]);
                     if (games.isEmpty() || games.size() <= gameNum) {
                         games = new ArrayList<>();

@@ -75,6 +75,7 @@ public class WebsocketHandler implements Consumer<WsConfig>{
     }
 
     private void handleConnect(WsContext ctx, UserGameCommand command) throws Exception {
+        ctx.enableAutomaticPings();
         String username = authDAO.getAuth(command.getAuthToken()).username();
 
         HashSet<WsContext> clients = allClients.computeIfAbsent(command.getGameID(), k -> new HashSet<>());
