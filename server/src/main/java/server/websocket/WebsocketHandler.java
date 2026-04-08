@@ -167,10 +167,13 @@ public class WebsocketHandler implements Consumer<WsConfig>{
         try {
             message = gameService.makeMove(move.getGameID(), move.getMove());
         } catch (Exception e) {
-            ctx.send(new Gson().toJson(new ErrorMessage(ERROR, "Invalid move: " + e.getMessage())));
+            //ctx.send(new Gson().toJson(new ErrorMessage(ERROR, "Invalid move: " + e.getMessage())));
             return;
         }
-
+        if (message.getClass().equals(ErrorMessage.class)) {
+            ctx.send(new Gson().toJson(message));
+            return;
+        }
         broadcast(allClients.get(move.getGameID()), message, null);
         NotificationMessage nm = new NotificationMessage(NOTIFICATION, username + " moved " + move.getMove().toString());
         broadcast(allClients.get(move.getGameID()), nm, ctx);
