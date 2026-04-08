@@ -24,12 +24,12 @@ public class LiveMenu {
         this.server = server;
         this.s = s;
         this.black = black;
-        socket = new WebsocketFacade();
+        socket = new WebsocketFacade(server.port, this);
     }
 
     public void run(int gameID) throws Exception {
         this.gameID = gameID;
-        // this.socket.connect(server.authToken, gameID);
+        this.socket.connect(server.authToken, gameID);
         String input = "";
         while (true) {
             System.out.printf("\n[GAME] >>> ");
@@ -120,7 +120,7 @@ public class LiveMenu {
             System.out.print("Please confirm: (Y)es (N)o >>> ");
             String choice = s.nextLine();
             if (choice.charAt(0) == 'Y' || choice.charAt(0) == 'y') {
-                // socket.resignGame(server.authToken, gameID);
+                socket.resignGame(server.authToken, gameID);
             } else {
                 System.out.println("OK, cancelling");
             }
@@ -155,7 +155,7 @@ public class LiveMenu {
                 move = new ChessMove(start, end, null);
             }
 
-            // this.socket.makeMove(server.authToken, gameID, move);
+            this.socket.makeMove(server.authToken, gameID, move);
         } catch (Exception e) {
             System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + e.getMessage());
         }
