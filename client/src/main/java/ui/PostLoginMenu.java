@@ -22,7 +22,7 @@ public class PostLoginMenu {
         System.out.println("Logged in as " + username);
     }
 
-    public boolean run() {
+    public boolean run() throws Exception {
         String input = "";
         while (true) {
             System.out.print(EscapeSequences.SET_TEXT_COLOR_GREEN + "\n[" + username + "] >>> ");
@@ -38,7 +38,7 @@ public class PostLoginMenu {
         }
     }
 
-    private void eval(String[] input) {
+    private void eval(String[] input) throws Exception {
         switch (input[0].toLowerCase()) {
             case "help":
                 System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "create <NAME> - a game");
@@ -92,7 +92,7 @@ public class PostLoginMenu {
                     GameData game = games.get(gameNum);
                     if (serverFacade.joinGame(game.gameID(), input[2].toUpperCase())) {
                         System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "Successfully joined game!");
-                        // printChessBoard(game.game(), input[2].equalsIgnoreCase("WHITE"), );
+                        new LiveMenu(serverFacade, scanner, input[2].equalsIgnoreCase("BLACK")).run(game.gameID());
 
                     } else {
                         System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "That color is already taken");
@@ -115,7 +115,7 @@ public class PostLoginMenu {
                     if (game == null) {
                         System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Game not found");
                     } else {
-                        // printChessBoard(game.game(), true, );
+                        new LiveMenu(serverFacade, scanner, false).run(game.gameID());
                     }
                 } catch (Exception exception) {
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Game not found");

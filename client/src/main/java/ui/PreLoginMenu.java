@@ -36,7 +36,7 @@ public class PreLoginMenu {
         scanner.close();
     }
 
-    private void eval(String[] input) {
+    private void eval(String[] input) throws Exception {
         switch (input[0].toLowerCase()) {
             case "help":
                 System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "register <USERNAME> <PASSWORD> <EMAIL> - to create an account");
@@ -73,7 +73,7 @@ public class PreLoginMenu {
         }
     }
 
-    private void register(String username, String password, String email) {
+    private void register(String username, String password, String email) throws Exception {
         if (server.register(username, password, email)) {
             System.out.println(EscapeSequences.SET_TEXT_COLOR_BLUE + "Successfully registered!");
             boolean isQuitting = new PostLoginMenu(server, username, scanner).run();
@@ -90,7 +90,7 @@ public class PreLoginMenu {
         }
     }
 
-    private void login(String username, String password) {
+    private void login(String username, String password) throws Exception {
         if (server.login(username, password)) {
             System.out.println(EscapeSequences.SET_TEXT_COLOR_BLUE + "Successfully logged in!");
             boolean isQuitting = new PostLoginMenu(server, username, scanner).run();
