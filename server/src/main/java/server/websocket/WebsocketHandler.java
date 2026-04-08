@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import chess.ChessGame.TeamColor;
 import dataaccess.AuthDAO;
 import model.GameData;
+import org.jetbrains.annotations.NotNull;
 import service.GameService;
 import websocket.commands.MoveCommand;
 import websocket.commands.UserGameCommand;
@@ -39,7 +40,7 @@ public class WebsocketHandler {
         try {
             switch (command.getCommandType()) {
                 case CONNECT:
-                    //handleConnect(session, command);
+                    handleConnect(session, command);
                     break;
 
                 case MAKE_MOVE:
@@ -66,4 +67,49 @@ public class WebsocketHandler {
             }
         }
     }
+
+    @OnWebSocketClose
+    public void onClose(Session session, int statusCode, String reason) {
+        allClients.values().forEach(clients -> clients.remove(session));
+    }
+
+    private void broadcast(HashSet<Session> clients, ServerMessage message, Session ignore) throws IOException{
+        for (Session s : clients) {
+            if (ignore != null && s.equals(ignore)) {
+                continue;
+            }
+            s.getRemote().sendString(new Gson().toJson(message));
+        }
+    }
+
+    private void handleConnect(Session session, UserGameCommand command) throws Exception {
+        String username = authDAO.getAuth(command.getAuthToken()).username();
+
+        HashSet<Session> clients = allClients.computeIfAbsent(command.getGameID(), k -> new HashSet<>());
+        clients.add(session);
+        GameData game = gameService.getGame(command.getGameID());
+
+        LoadGameMessage message = new LoadGameMessage(LOAD_GAME, game.game());
+        session.getRemote().sendString(new Gson().toJson(message));
+
+        NotificationMessage m = getNotificationMessage(game, username);
+        broadcast(clients, m, session);
+    }
+
+    @NotNull
+    private static NotificationMessage getNotificationMessage(GameData game, String username) {
+        String black = game.blackUsername();
+        String white = game.whiteUsername();
+        NotificationMessage m;
+        if (black != null && username.equals(black)) {
+            m = new NotificationMessage(NOTIFICATION, username + " joined as black");
+        } else if (white != null && username.equals(white)) {
+            m = new NotificationMessage(NOTIFICATION, username + " joined as white");
+        } else {
+            m = new NotificationMessage(NOTIFICATION, username + " joined as an observer");
+        }
+        return m;
+    }
+
+
 }

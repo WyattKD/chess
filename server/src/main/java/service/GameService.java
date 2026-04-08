@@ -110,4 +110,12 @@ public class GameService {
         }
         return new JoinGameResult(null);
     }
+
+    public GameData getGame(int gameID) throws DataAccessException {
+        return gameDAO.getGame(gameID);
+    }
+
+    public void setGame(GameData game) throws DataAccessException {
+        gameDAO.updateGame(game);
+    }
 }
