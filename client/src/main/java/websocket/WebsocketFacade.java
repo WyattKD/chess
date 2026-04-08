@@ -22,10 +22,8 @@ public class WebsocketFacade extends Endpoint {
 
     public WebsocketFacade(int port, LiveMenu menu) throws Exception {
         socket = new URI("ws://localhost:" + port + "/ws");
-
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         session = container.connectToServer(this, socket);
-
         session.addMessageHandler(new MessageHandler.Whole<String>() {
             public void onMessage(String message) {
                 ServerMessage m = new Gson().fromJson(message, ServerMessage.class);
@@ -35,18 +33,22 @@ public class WebsocketFacade extends Endpoint {
                         menu.updateGame(game.game);
                         break;
 
-                    case NOTIFICATION:
-                        NotificationMessage nm = new Gson().fromJson(message, NotificationMessage.class);
-                        menu.displayNotification(nm.message);
-                        break;
-
                     case ERROR:
                         ErrorMessage em = new Gson().fromJson(message, ErrorMessage.class);
                         menu.displayError(em.errorMessage);
                         break;
+
+                    case NOTIFICATION:
+                        NotificationMessage nm = new Gson().fromJson(message, NotificationMessage.class);
+                        menu.displayNotification(nm.message);
+                        break;
                 }
             }
         });
+    }
+    public void leaveGame(String authToken, int gameID) throws IOException {
+        UserGameCommand command = new UserGameCommand(CommandType.LEAVE, authToken, gameID);
+        session.getBasicRemote().sendText(new Gson().toJson(command));
     }
 
     public void connect(String authToken, int gameID) throws IOException {
@@ -54,18 +56,13 @@ public class WebsocketFacade extends Endpoint {
         session.getBasicRemote().sendText(new Gson().toJson(command));
     }
 
-    public void makeMove(String authToken, int gameID, ChessMove move) throws IOException {
-        MoveCommand command = new MoveCommand(authToken, gameID, move);
-        session.getBasicRemote().sendText(new Gson().toJson(command));
-    }
-
-    public void leaveGame(String authToken, int gameID) throws IOException {
-        UserGameCommand command = new UserGameCommand(CommandType.LEAVE, authToken, gameID);
-        session.getBasicRemote().sendText(new Gson().toJson(command));
-    }
-
     public void resignGame(String authToken, int gameID) throws IOException {
         UserGameCommand command = new UserGameCommand(CommandType.RESIGN, authToken, gameID);
+        session.getBasicRemote().sendText(new Gson().toJson(command));
+    }
+
+    public void makeMove(String authToken, int gameID, ChessMove move) throws IOException {
+        MoveCommand command = new MoveCommand(authToken, gameID, move);
         session.getBasicRemote().sendText(new Gson().toJson(command));
     }
 

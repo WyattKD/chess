@@ -28,18 +28,16 @@ public class WebsocketHandler implements Consumer<WsConfig>{
     private HashMap<Integer, HashSet<WsContext>> allClients;
 
     public WebsocketHandler(GameService gameService, AuthDAO authDAO) {
-        this.gameService = gameService;
         this.authDAO = authDAO;
+        this.gameService = gameService;
         allClients = new HashMap<>();
     }
 
     @Override
     public void accept(WsConfig ws) {
-
         ws.onMessage(ctx -> {
             String message = ctx.message();
             UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
-
             try {
                 switch (command.getCommandType()) {
                     case CONNECT -> handleConnect(ctx, command);
@@ -54,7 +52,6 @@ public class WebsocketHandler implements Consumer<WsConfig>{
                 ctx.send(new Gson().toJson(new ErrorMessage(ERROR, e.getMessage())));
             }
         });
-
         ws.onClose(ctx -> {
             allClients.values().forEach(clients -> clients.remove(ctx));
         });
@@ -120,32 +117,37 @@ public class WebsocketHandler implements Consumer<WsConfig>{
         }
         broadcast(allClients.get(game.gameID()), m, ctx);
         gameService.setGame(game);
-        ctx.session.close();
+        HashSet<WsContext> clients = allClients.get(game.gameID());
+        if (clients != null) {
+            clients.remove(ctx);
+        }
     }
 
     private void handleResign(UserGameCommand command, WsContext ctx) throws Exception {
         GameData game = gameService.getGame(command.getGameID());
         String username = authDAO.getAuth(command.getAuthToken()).username();
-
-        String black = game.blackUsername();
         String white = game.whiteUsername();
-        NotificationMessage m;
+        String black = game.blackUsername();
+        NotificationMessage mes;
 
         GameData gameReset = new GameData(game.gameID(), null, null, game.gameName(), game.game());
         if (black != null && username.equals(black)) {
             game = gameReset;
-            m = new NotificationMessage(NOTIFICATION, username + " has resigned. White wins!");
+            mes = new NotificationMessage(NOTIFICATION, username + " has resigned. White wins!");
         } else if (white != null && username.equals(white)) {
             game = gameReset;
-            m = new NotificationMessage(NOTIFICATION, username + " has resigned. Black wins!");
+            mes = new NotificationMessage(NOTIFICATION, username + " has resigned. Black wins!");
         } else {
             ctx.send(new Gson().toJson(new ErrorMessage(ERROR, "Spectators cannot resign.")));
             return;
         }
 
-        broadcast(allClients.get(game.gameID()), m, null);
+        broadcast(allClients.get(game.gameID()), mes, null);
         gameService.setGame(game);
-        ctx.session.close();
+        HashSet<WsContext> clients = allClients.get(game.gameID());
+        if (clients != null) {
+            clients.remove(ctx);
+        }
     }
 
     private void handleMove(MoveCommand move, WsContext ctx) throws Exception {
@@ -157,9 +159,11 @@ public class WebsocketHandler implements Consumer<WsConfig>{
             return;
         }
 
-        ServerMessage message = gameService.makeMove(move.getGameID(), move.getMove());
-        if (message.getClass().equals(ErrorMessage.class)) {
-            ctx.send(new Gson().toJson(message));
+        ServerMessage message;
+        try {
+            message = gameService.makeMove(move.getGameID(), move.getMove());
+        } catch (Exception e) {
+            ctx.send(new Gson().toJson(new ErrorMessage(ERROR, "Invalid move: " + e.getMessage())));
             return;
         }
 
