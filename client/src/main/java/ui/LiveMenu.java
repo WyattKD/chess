@@ -35,7 +35,7 @@ public class LiveMenu {
             System.out.printf("\n[GAME] >>> ");
             input = s.nextLine();
             if (input.equals("leave")) {
-                // this.socket.leaveGame(server.authToken, gameID);
+                this.socket.leaveGame(server.authToken, gameID);
                 break;
             }
             eval(input.split(" "));
@@ -93,14 +93,15 @@ public class LiveMenu {
     }
 
     public void renderGame(Collection<ChessMove> validMoves, boolean print) {
-        printChessBoard(currentGame, black, validMoves);
+        System.out.println("\n");
+        printChessBoard(currentGame, !black, validMoves);
         if (print) {
             System.out.printf("\n[GAME] >>> ");
         }
     }
 
     public void displayNotification(String n) {
-        System.out.print(EscapeSequences.ERASE_LINE + EscapeSequences.SET_BG_COLOR_BLUE);
+        System.out.print(EscapeSequences.ERASE_LINE + EscapeSequences.SET_BG_COLOR_DARK_GREY);
         System.out.println(n + EscapeSequences.RESET_BG_COLOR);
         System.out.printf("\n[GAME] >>> ");
     }
@@ -122,7 +123,7 @@ public class LiveMenu {
             if (choice.charAt(0) == 'Y' || choice.charAt(0) == 'y') {
                 socket.resignGame(server.authToken, gameID);
             } else {
-                System.out.println("OK, cancelling");
+                System.out.println("Cancelling.");
             }
         } catch (Exception e) {
             System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + e.getMessage());

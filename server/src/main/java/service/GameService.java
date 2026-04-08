@@ -1,5 +1,7 @@
 package service;
 
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
@@ -7,7 +9,14 @@ import model.AuthData;
 import model.GameData;
 import model.results.*;
 import model.requests.*;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.ServerMessage;
+
 import java.util.Collection;
+
+import static websocket.messages.ServerMessage.ServerMessageType.ERROR;
+import static websocket.messages.ServerMessage.ServerMessageType.LOAD_GAME;
 
 public class GameService {
     private final AuthDAO authDAO;
@@ -117,5 +126,21 @@ public class GameService {
 
     public void setGame(GameData game) throws DataAccessException {
         gameDAO.updateGame(game);
+    }
+
+    public ServerMessage makeMove(int gameID, ChessMove move) throws DataAccessException {
+        GameData gameData = gameDAO.getGame(gameID);
+        if (gameData == null) {
+            return new ErrorMessage(ERROR, "no game");
+        }
+
+        try {
+            gameData.game().makeMove(move);
+        } catch (InvalidMoveException e) {
+            return new ErrorMessage(ERROR, "invalid move " + move.toString());
+        }
+
+        gameDAO.updateGame(gameData);
+        return new LoadGameMessage(LOAD_GAME, gameData.game());
     }
 }

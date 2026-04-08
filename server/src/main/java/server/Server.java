@@ -5,12 +5,12 @@ import dataaccess.*;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
+import server.websocket.WebsocketHandler;
 import service.ClearService;
 import service.GameService;
 import service.UserService;
 import model.requests.*;
 import model.results.*;
-
 
 public class Server {
 
@@ -41,7 +41,8 @@ public class Server {
         } catch (Exception exception) {
             System.out.println(exception);
         }
-        
+
+        javalin.ws("/ws", new WebsocketHandler(gameService, authDAO));
         javalin.delete("/db", this::clearHandler);
         javalin.post("/user", this::registerHandler);
         javalin.post("/session", this::loginHandler);

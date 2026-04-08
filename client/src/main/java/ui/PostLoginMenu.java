@@ -161,7 +161,7 @@ public class PostLoginMenu {
                 } else {
                     out.print(EscapeSequences.SET_BG_COLOR_GREEN);
                 }
-                highlightColor(out, r, c, validMoves);
+                highlightColor(out, r, c, validMoves, whiteView);
                 ChessPiece piece = game.getBoard().getPiece(new ChessPosition(properRow, properCol));
                 if (piece != null) {
                     out.print(getRenderedPiece(piece));
@@ -222,8 +222,15 @@ public class PostLoginMenu {
         }
     }
 
-    static void highlightColor(PrintStream out, int r, int c, Collection<ChessMove> validMoves) {
+    static void highlightColor(PrintStream out, int r, int c, Collection<ChessMove> validMoves, boolean whiteView) {
         if (validMoves != null) {
+            if (whiteView) {
+                r = 8 - r;
+                c = c + 1;
+            } else {
+                r = r + 1;
+                c = 8 - c;
+            }
             for (ChessMove m : validMoves) {
                 ChessPosition ep = m.getEndPosition();
                 ChessPosition sp = m.getStartPosition();
@@ -232,7 +239,7 @@ public class PostLoginMenu {
                 int endRow = ep.getRow();
                 int endCol = ep.getColumn();
                 if (r == endRow && c == endCol) {
-                    out.print(EscapeSequences.SET_BG_COLOR_DARK_GREEN);
+                    out.print(EscapeSequences.SET_BG_COLOR_RED);
                 } else if (r == startRow && c == startCol) {
                     out.print(EscapeSequences.SET_BG_COLOR_BLUE);
                 }

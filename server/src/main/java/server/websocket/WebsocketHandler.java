@@ -1,6 +1,7 @@
 package server.websocket;
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.annotations.*;
+import io.javalin.websocket.WsContext;
+import io.javalin.websocket.WsConfig;
+import java.util.function.Consumer;
 import com.google.gson.Gson;
 import chess.ChessGame.TeamColor;
 import dataaccess.AuthDAO;
@@ -21,11 +22,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 
-@WebSocket
-public class WebsocketHandler {
+public class WebsocketHandler implements Consumer<WsConfig>{
     private final GameService gameService;
     private final AuthDAO authDAO;
-    private HashMap<Integer, HashSet<Session>> allClients;
+    private HashMap<Integer, HashSet<WsContext>> allClients;
 
     public WebsocketHandler(GameService gameService, AuthDAO authDAO) {
         this.gameService = gameService;
@@ -33,67 +33,58 @@ public class WebsocketHandler {
         allClients = new HashMap<>();
     }
 
-    @OnWebSocketMessage
-    public void onMessage(Session session, String message) {
-        UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
+    @Override
+    public void accept(WsConfig ws) {
 
-        try {
-            switch (command.getCommandType()) {
-                case CONNECT:
-                    handleConnect(session, command);
-                    break;
+        ws.onMessage(ctx -> {
+            String message = ctx.message();
+            UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
 
-                case MAKE_MOVE:
-                    MoveCommand move = new Gson().fromJson(message, MoveCommand.class);
-                    //handleMove(move, session);
-                    break;
-
-                case LEAVE:
-                    handleLeave(command, session);
-                    break;
-
-                case RESIGN:
-                    handleResign(command, session);
-                    break;
-
-                default:
-                    break;
-            }
-        } catch (Exception e) {
             try {
-                session.getRemote().sendString(new Gson().toJson(new ErrorMessage(ERROR, e.getMessage())));
-            } catch (IOException ee) {
-                System.out.println(ee.getMessage());
+                switch (command.getCommandType()) {
+                    case CONNECT -> handleConnect(ctx, command);
+                    case MAKE_MOVE -> {
+                        MoveCommand move = new Gson().fromJson(message, MoveCommand.class);
+                        handleMove(move, ctx);
+                    }
+                    case LEAVE -> handleLeave(command, ctx);
+                    case RESIGN -> handleResign(command, ctx);
+                }
+            } catch (Exception e) {
+                ctx.send(new Gson().toJson(new ErrorMessage(ERROR, e.getMessage())));
             }
+        });
+
+        ws.onClose(ctx -> {
+            allClients.values().forEach(clients -> clients.remove(ctx));
+        });
+    }
+
+    public void onClose(WsContext ctx, int statusCode, String reason) {
+        allClients.values().forEach(clients -> clients.remove(ctx));
+    }
+
+    private void broadcast(HashSet<WsContext> clients, ServerMessage message, WsContext ignore) {
+        if (clients == null) return;
+
+        for (WsContext ctx : clients) {
+            if (ignore != null && ctx.equals(ignore)) continue;
+            ctx.send(new Gson().toJson(message));
         }
     }
 
-    @OnWebSocketClose
-    public void onClose(Session session, int statusCode, String reason) {
-        allClients.values().forEach(clients -> clients.remove(session));
-    }
-
-    private void broadcast(HashSet<Session> clients, ServerMessage message, Session ignore) throws IOException{
-        for (Session s : clients) {
-            if (s.equals(ignore)) {
-                continue;
-            }
-            s.getRemote().sendString(new Gson().toJson(message));
-        }
-    }
-
-    private void handleConnect(Session session, UserGameCommand command) throws Exception {
+    private void handleConnect(WsContext ctx, UserGameCommand command) throws Exception {
         String username = authDAO.getAuth(command.getAuthToken()).username();
 
-        HashSet<Session> clients = allClients.computeIfAbsent(command.getGameID(), k -> new HashSet<>());
-        clients.add(session);
+        HashSet<WsContext> clients = allClients.computeIfAbsent(command.getGameID(), k -> new HashSet<>());
+        clients.add(ctx);
         GameData game = gameService.getGame(command.getGameID());
 
         LoadGameMessage message = new LoadGameMessage(LOAD_GAME, game.game());
-        session.getRemote().sendString(new Gson().toJson(message));
+        ctx.send(new Gson().toJson(message));
 
         NotificationMessage m = getNotificationMessage(game, username);
-        broadcast(clients, m, session);
+        broadcast(clients, m, ctx);
     }
 
     @NotNull
@@ -101,9 +92,9 @@ public class WebsocketHandler {
         String black = game.blackUsername();
         String white = game.whiteUsername();
         NotificationMessage m;
-        if (username.equals(black)) {
+        if (black != null && username.equals(black)) {
             m = new NotificationMessage(NOTIFICATION, username + " joined as black.");
-        } else if (username.equals(white)) {
+        } else if (white != null && username.equals(white)) {
             m = new NotificationMessage(NOTIFICATION, username + " joined as white.");
         } else {
             m = new NotificationMessage(NOTIFICATION, username + " joined as a spectator.");
@@ -111,28 +102,28 @@ public class WebsocketHandler {
         return m;
     }
 
-    private void handleLeave(UserGameCommand command, Session session) throws Exception {
+    private void handleLeave(UserGameCommand command, WsContext ctx) throws Exception {
         GameData game = gameService.getGame(command.getGameID());
         String username = authDAO.getAuth(command.getAuthToken()).username();
 
         String black = game.blackUsername();
         String white = game.whiteUsername();
         NotificationMessage m;
-        if (username.equals(black)) {
+        if (black != null && username.equals(black)) {
             game = new GameData(game.gameID(), game.whiteUsername(), null, game.gameName(), game.game());
             m = new NotificationMessage(NOTIFICATION, username + " left the game.");
-        } else if (username.equals(white)) {
+        } else if (white != null && username.equals(white)) {
             game = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game());
             m = new NotificationMessage(NOTIFICATION, username + " left the game.");
         } else {
             m = new NotificationMessage(NOTIFICATION, username + " has stopped observing.");
         }
-        broadcast(allClients.get(game.gameID()), m, session);
+        broadcast(allClients.get(game.gameID()), m, ctx);
         gameService.setGame(game);
-        session.close();
+        ctx.session.close();
     }
 
-    private void handleResign(UserGameCommand command, Session session) throws Exception {
+    private void handleResign(UserGameCommand command, WsContext ctx) throws Exception {
         GameData game = gameService.getGame(command.getGameID());
         String username = authDAO.getAuth(command.getAuthToken()).username();
 
@@ -141,20 +132,60 @@ public class WebsocketHandler {
         NotificationMessage m;
 
         GameData gameReset = new GameData(game.gameID(), null, null, game.gameName(), game.game());
-        if (username.equals(black)) {
+        if (black != null && username.equals(black)) {
             game = gameReset;
             m = new NotificationMessage(NOTIFICATION, username + " has resigned. White wins!");
-        } else if (username.equals(white)) {
+        } else if (white != null && username.equals(white)) {
             game = gameReset;
             m = new NotificationMessage(NOTIFICATION, username + " has resigned. Black wins!");
         } else {
-            session.getRemote().sendString(new Gson().toJson(new ErrorMessage(ERROR, "Spectators cannot resign.")));
+            ctx.send(new Gson().toJson(new ErrorMessage(ERROR, "Spectators cannot resign.")));
             return;
         }
 
         broadcast(allClients.get(game.gameID()), m, null);
         gameService.setGame(game);
-        session.close();
+        ctx.session.close();
+    }
+
+    private void handleMove(MoveCommand move, WsContext ctx) throws Exception {
+        String username = authDAO.getAuth(move.getAuthToken()).username();
+        GameData gameData = gameService.getGame(move.getGameID());
+        if (!username.equals(gameData.game().getTeamTurn() == TeamColor.WHITE ? gameData.whiteUsername() : gameData.blackUsername())) {
+            ServerMessage message = new ErrorMessage(ERROR, "you cannot move that piece");
+            ctx.send(new Gson().toJson(message));
+            return;
+        }
+
+        ServerMessage message = gameService.makeMove(move.getGameID(), move.getMove());
+        if (message.getClass().equals(ErrorMessage.class)) {
+            ctx.send(new Gson().toJson(message));
+            return;
+        }
+
+        broadcast(allClients.get(move.getGameID()), message, null);
+        NotificationMessage nm = new NotificationMessage(NOTIFICATION, username + " moved " + move.getMove().toString());
+        broadcast(allClients.get(move.getGameID()), nm, ctx);
+
+        gameData.game().makeMove(move.getMove());
+
+        boolean stalemate = gameData.game().isInStalemate(gameData.game().getTeamTurn());
+        boolean check = gameData.game().isInCheck(gameData.game().getTeamTurn());
+        boolean checkmate = gameData.game().isInCheckmate(gameData.game().getTeamTurn());
+
+        if (check || checkmate || stalemate) {
+            username = gameData.game().getTeamTurn() == TeamColor.WHITE ? gameData.whiteUsername() : gameData.blackUsername();
+            String mate;
+            if (stalemate) {
+                mate = " is in stalemate.";
+            } else if (checkmate) {
+                mate = " has been checkmated.";
+            } else {
+                mate = " is in check.";
+            }
+            nm = new NotificationMessage(NOTIFICATION, username + mate);
+            broadcast(allClients.get(move.getGameID()), nm, null);
+        }
     }
 
 }
