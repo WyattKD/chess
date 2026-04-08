@@ -49,11 +49,11 @@ public class WebsocketHandler {
                     break;
 
                 case LEAVE:
-                    //handleLeave(command, session);
+                    handleLeave(command, session);
                     break;
 
                 case RESIGN:
-                    //handleResign(command, session);
+                    handleResign(command, session);
                     break;
 
                 default:
@@ -75,7 +75,7 @@ public class WebsocketHandler {
 
     private void broadcast(HashSet<Session> clients, ServerMessage message, Session ignore) throws IOException{
         for (Session s : clients) {
-            if (ignore != null && s.equals(ignore)) {
+            if (s.equals(ignore)) {
                 continue;
             }
             s.getRemote().sendString(new Gson().toJson(message));
@@ -101,15 +101,60 @@ public class WebsocketHandler {
         String black = game.blackUsername();
         String white = game.whiteUsername();
         NotificationMessage m;
-        if (black != null && username.equals(black)) {
-            m = new NotificationMessage(NOTIFICATION, username + " joined as black");
-        } else if (white != null && username.equals(white)) {
-            m = new NotificationMessage(NOTIFICATION, username + " joined as white");
+        if (username.equals(black)) {
+            m = new NotificationMessage(NOTIFICATION, username + " joined as black.");
+        } else if (username.equals(white)) {
+            m = new NotificationMessage(NOTIFICATION, username + " joined as white.");
         } else {
-            m = new NotificationMessage(NOTIFICATION, username + " joined as an observer");
+            m = new NotificationMessage(NOTIFICATION, username + " joined as a spectator.");
         }
         return m;
     }
 
+    private void handleLeave(UserGameCommand command, Session session) throws Exception {
+        GameData game = gameService.getGame(command.getGameID());
+        String username = authDAO.getAuth(command.getAuthToken()).username();
+
+        String black = game.blackUsername();
+        String white = game.whiteUsername();
+        NotificationMessage m;
+        if (username.equals(black)) {
+            game = new GameData(game.gameID(), game.whiteUsername(), null, game.gameName(), game.game());
+            m = new NotificationMessage(NOTIFICATION, username + " left the game.");
+        } else if (username.equals(white)) {
+            game = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game());
+            m = new NotificationMessage(NOTIFICATION, username + " left the game.");
+        } else {
+            m = new NotificationMessage(NOTIFICATION, username + " has stopped observing.");
+        }
+        broadcast(allClients.get(game.gameID()), m, session);
+        gameService.setGame(game);
+        session.close();
+    }
+
+    private void handleResign(UserGameCommand command, Session session) throws Exception {
+        GameData game = gameService.getGame(command.getGameID());
+        String username = authDAO.getAuth(command.getAuthToken()).username();
+
+        String black = game.blackUsername();
+        String white = game.whiteUsername();
+        NotificationMessage m;
+
+        GameData gameReset = new GameData(game.gameID(), null, null, game.gameName(), game.game());
+        if (username.equals(black)) {
+            game = gameReset;
+            m = new NotificationMessage(NOTIFICATION, username + " has resigned. White wins!");
+        } else if (username.equals(white)) {
+            game = gameReset;
+            m = new NotificationMessage(NOTIFICATION, username + " has resigned. Black wins!");
+        } else {
+            session.getRemote().sendString(new Gson().toJson(new ErrorMessage(ERROR, "Spectators cannot resign.")));
+            return;
+        }
+
+        broadcast(allClients.get(game.gameID()), m, null);
+        gameService.setGame(game);
+        session.close();
+    }
 
 }
