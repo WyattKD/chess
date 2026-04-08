@@ -62,10 +62,14 @@ public class WebsocketHandler implements Consumer<WsConfig>{
     }
 
     private void broadcast(HashSet<WsContext> clients, ServerMessage message, WsContext ignore) {
-        if (clients == null) return;
+        if (clients == null) {
+            return;
+        }
 
         for (WsContext ctx : clients) {
-            if (ignore != null && ctx.equals(ignore)) continue;
+            if (ignore != null && ctx.equals(ignore)) {
+                continue;
+            }
             ctx.send(new Gson().toJson(message));
         }
     }

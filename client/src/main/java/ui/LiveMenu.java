@@ -21,8 +21,8 @@ public class LiveMenu {
     private ChessGame currentGame = new ChessGame();
 
     public LiveMenu(ServerFacade serverFacade, Scanner scanner, boolean isBlack) throws Exception {
-        this.serverFacade = serverFacade;
         this.scanner = scanner;
+        this.serverFacade = serverFacade;
         this.isBlack = isBlack;
         webSocket = new WebsocketFacade(serverFacade.port, this);
     }
@@ -101,18 +101,6 @@ public class LiveMenu {
         }
     }
 
-    public void displayNotification(String n) {
-        System.out.print(EscapeSequences.ERASE_LINE + EscapeSequences.SET_BG_COLOR_DARK_GREY);
-        System.out.println(n + EscapeSequences.RESET_BG_COLOR);
-        System.out.printf("\n[GAME] >>> ");
-    }
-
-    public void displayError(String e) {
-        System.out.print(EscapeSequences.ERASE_LINE + EscapeSequences.SET_BG_COLOR_DARK_GREY);
-        System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + e + EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
-        System.out.printf("\n[GAME] >>> ");
-    }
-
     private void handleHighlight(String pos) {
         renderGame(currentGame.validMoves(parsePosition(pos)), false);
     }
@@ -176,5 +164,17 @@ public class LiveMenu {
         }
 
         return new ChessPosition(row, col - 'a' + 1);
+    }
+
+    public void displayNotification(String n) {
+        System.out.print(EscapeSequences.ERASE_LINE + EscapeSequences.SET_BG_COLOR_DARK_GREY);
+        System.out.println(n + EscapeSequences.RESET_BG_COLOR);
+        System.out.printf("\n[GAME] >>> ");
+    }
+
+    public void displayError(String e) {
+        System.out.print(EscapeSequences.ERASE_LINE + EscapeSequences.SET_BG_COLOR_DARK_GREY);
+        System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + e + EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR);
+        System.out.printf("\n[GAME] >>> ");
     }
 }
